@@ -37,6 +37,7 @@ insert into clientes values(20, 'Marcela', 'Ortega', 'Plaza 852', 37, '555-1092'
 
 select * from clientes;
 
---- Indices ---
-create clustered index Indx_cliente
-on clientes(id);
+--- Distinct ---
+--- sirve para obtener valores sin repetirse
+select distinct direccion from clientes
+where edad > 20;
