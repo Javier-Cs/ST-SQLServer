@@ -19,3 +19,4 @@ order by EDAD;
 select nombre, APELLIDO, EDAD , SALARIO
 FROM Empleados
 order by EDAD desc, SALARIO asc;
+
