@@ -45,3 +45,16 @@ from Test.Empleados e
 join Test.Departamentos d
 --- obtenemos los registros que tengan un id similar en las tablas
 on e.DepartamentoId = d.Id
+
+
+
+--- uso de INNER JOIN
+-- seleccionando registros espesificos  y dandoles un alias
+---
+select
+e.Nombre as 'Empleado',
+d.Nombre as 'Departamento'
+from Test.Empleados e
+
+join Test.Departamentos d
+on e.DepartamentoId = d.Id

@@ -138,3 +138,23 @@ from practica.Productos_tbl
 --- con in selecionamos los valores especificos
 where categoria in( 'Electrónica', 'Accesorios') and stock <100
 order by precio asc
+
+
+--- Ejercicio 3
+-- Lista todos los pedidos que se encuentran en estado 'Pendiente'.
+-- Para cada pedido, muestra el ID del pedido, la fecha del pedido
+-- y el nombre completo del cliente que realizó ese pedido.
+-- Incluye solo los pedidos de los clientes con ID 1, 2 o 4.
+--------------------------------------------------
+select * from practica.Pedido_tbl;
+
+select
+    p.PedidoId,
+    p.FechaPedido,
+    c.Nombre+' '+ c.Apellido as "Nombre cliente"
+
+from practica.Pedido_tbl p
+         inner join practica.Clientes_tbl c
+                    on
+                        p.Cliente_id = c.ClienteId
+where Estado ='Pendiente' and p.Cliente_id in(1,2,4)
