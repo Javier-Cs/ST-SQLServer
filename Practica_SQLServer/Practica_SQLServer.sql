@@ -125,3 +125,16 @@ select top(3) Nombre, Apellido from practica.Clientes_tbl
 ---where  Activo = 1 and not Email = 'null'
 where  Activo = 1 and Email is not null
 order by Apellido asc;
+
+
+--- Ejercicio 2
+--- Muestra el nombre del producto, su precio y el stock disponible de todos aquellos
+--- productos que pertenecen a la categoría 'Electrónica' o 'Accesorios',
+--- y cuyo stock sea inferior a 100 unidades.
+--- Los productos deben aparecer ordenados de menor a mayor precio.
+--------------------------------------------------
+select Nombre_Producto, precio, stock, categoria
+from practica.Productos_tbl
+--- con in selecionamos los valores especificos
+where categoria in( 'Electrónica', 'Accesorios') and stock <100
+order by precio asc
