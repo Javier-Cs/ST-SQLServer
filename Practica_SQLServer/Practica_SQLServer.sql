@@ -112,3 +112,16 @@ INSERT INTO practica.DetallesPedido_tbl (Pedido_Id, Producto_Id, Cantidad, Preci
 (5, 6, 1, 25.00),   -- Webcam Full HD
 (6, 7, 1, 180.00),   -- Silla Gamer
 (6, 2, 1, 75.50);    -- Teclado Mecánico
+
+
+
+--- Ejercicio 1
+--- Necesitas obtener el nombre y el apellido de todos los clientes que están activos y cuyo correo electrónico no sea nulo.
+--- Además, los resultados deben estar ordenados alfabéticamente por el apellido y, si el apellido es el mismo, por el nombre.
+--- Finalmente, solo muestra los primeros 3 clientes de la lista resultante.
+--------------------------------------------------
+select top(3) Nombre, Apellido from practica.Clientes_tbl
+--- el Not Email = ´null´ -> busca los correos que tengan literalmente null como cadena de texto
+---where  Activo = 1 and not Email = 'null'
+where  Activo = 1 and Email is not null
+order by Apellido asc;
