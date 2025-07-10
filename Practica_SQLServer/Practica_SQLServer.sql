@@ -176,3 +176,33 @@ where Nombre_producto = 'Laptop Gamer X1'
 update practica.Productos_tbl
 set precio = 80.00, descrpcion_producto = 'Teclado mecánico retroiluminado de alta gama con switches Cherry MX'
 where Nombre_producto = 'Teclado Mecánico RGB'
+
+
+--- Ejercicio 5
+-- Encuentra el nombre y apellido de todos los clientes que NO han realizado ningún pedido hasta la fecha.
+-- Identifica los nombres de los productos que nunca han sido parte de ningún pedido.
+--------------------------------------------------
+select * from practica.Clientes_tbl
+select * from practica.Productos_tbl
+select * from practica.Pedido_tbl
+select * from practica.DetallesPedido_tbl
+
+select
+    C.Nombre as 'nombre',
+    C.Apellido as 'apellido'
+
+from practica.Clientes_tbl as C
+left join practica.Pedido_tbl as P
+on C.ClienteId = P.Cliente_id
+where P.PedidoId is null
+
+
+select
+    P.Nombre_producto as 'Nombre de los productos sin pedido'
+from
+    practica.Productos_tbl as P
+        left join
+    practica.DetallesPedido_tbl as DP
+    on
+        P.ProductoId = DP.Producto_Id
+where DP.DetalleId is null;
