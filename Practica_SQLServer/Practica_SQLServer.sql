@@ -206,3 +206,35 @@ from
     on
         P.ProductoId = DP.Producto_Id
 where DP.DetalleId is null;
+
+
+--- Ejercicio 5
+-- Identifica y elimina de la tabla Clientes a todos aquellos clientes que están marcados como inactivos (Activo = 0) y que,
+-- además, no tienen ningún pedido registrado en la tabla Pedidos.
+-- Ten mucho cuidado con esta operación y asegúrate de entender lo que haces.
+--------------------------------------------------
+select * from practica.Clientes_tbl
+select * from practica.Productos_tbl
+select * from practica.Pedido_tbl
+select * from practica.DetallesPedido_tbl
+
+
+delete C
+from  practica.Clientes_tbl as C
+left  join practica.Pedido_tbl as P
+on
+C.ClienteId = P.Cliente_id
+where P.PedidoId is null and Activo = 0
+
+---- opcion 2
+
+delete from practica.Clientes_tbl
+where Activo = 0
+  and
+    not exists(
+        select 1
+        from practica.Pedido_tbl
+        where Cliente_id = practica.Clientes_tbl.ClienteId
+    );
+
+
