@@ -158,3 +158,21 @@ from practica.Pedido_tbl p
                     on
                         p.Cliente_id = c.ClienteId
 where Estado ='Pendiente' and p.Cliente_id in(1,2,4)
+
+
+--- Ejercicio 4
+-- Ha habido una actualización de inventario y de descripciones.
+-- Actualiza el stock del producto 'Laptop Gamer X1' para que sea 45.
+-- Actualiza el precio y la descripción del producto 'Teclado Mecánico RGB'.
+-- Su nuevo precio debe ser 80.00 y
+-- su descripción debe ser: 'Teclado mecánico retroiluminado de alta gama con switches Cherry MX'.
+--------------------------------------------------
+
+select * from practica.Productos_tbl
+
+update practica.Productos_tbl set stock = 45
+where Nombre_producto = 'Laptop Gamer X1'
+
+update practica.Productos_tbl
+set precio = 80.00, descrpcion_producto = 'Teclado mecánico retroiluminado de alta gama con switches Cherry MX'
+where Nombre_producto = 'Teclado Mecánico RGB'
