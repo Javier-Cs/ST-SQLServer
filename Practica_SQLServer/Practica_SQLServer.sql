@@ -257,3 +257,26 @@ values(6, GETDATE(), 'Pendiente',0);
 
 insert into practica.DetallesPedido_tbl
 values(8, 8, 1,95.00);
+
+
+
+
+-- parte 1
+-- obteniendo el id dinamicamente para pedido y detalle pedido
+insert into practica.Productos_tbl
+values( 'Monitor Gaming Pro','Auriculares con sonido envolvente 7.1', 95.00, 70, 'Audio', GETDATE());
+
+-- obtener el id del producto que acabamos de insertar
+Declare @nuevoIdProducto int;
+-- scope_identity() devuelve el ultimo id de la entidad creado actualmente
+set @nuevoIdProducto = SCOPE_IDENTITY();
+-- imprimimos el id obtenido
+print 'id del producto nuevo ' + cast(@nuevoIdProducto as nvarchar(10));
+
+-- parte 2
+-- obtenemos el id de laura
+declare @idLaura int;
+select @idLaura = ClienteId
+from practica.Clientes_tbl
+where Nombre = 'Laura' and Apellido = 'Martínez'
+    print 'id: ' + cast(@idLaura as nvarchar(5));
