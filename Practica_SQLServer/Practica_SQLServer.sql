@@ -300,3 +300,15 @@ declare @idABuscar int;
 set @idABuscar = SCOPE_IDENTITY(); -- devuelve el ultimo id
 print 'ID del nuevo pedido para Laura: ' + CAST(@NuevoPedidoID AS NVARCHAR(10));
 
+
+
+-- parte 3
+-- ingreso de detalle de pedido
+insert into practica.DetallesPedido_tbl
+values(@idPedidoBuscar, @nuevoIdProducto, 1, 95.00)
+
+-- actualizacion de total
+update practica.Pedido_tbl
+set Total = (select sum (Cantidad * PrecioUnitario)
+             from practica.DetallesPedido_tbl  where Pedido_Id = @idPedidoBuscar)
+where PedidoId = @idPedidoBuscar;
