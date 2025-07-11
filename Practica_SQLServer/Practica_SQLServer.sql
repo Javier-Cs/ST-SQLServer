@@ -238,3 +238,22 @@ where Activo = 0
     );
 
 
+
+--- Ejercicio 7
+-- Inserta un nuevo producto en la tabla Productos
+-- Inserta un nuevo pedido para la cliente 'Laura Martínez' (deberás encontrar su ClienteID).
+--------------------------------------------------
+select * from practica.Clientes_tbl
+select * from practica.Productos_tbl
+select * from practica.Pedido_tbl
+select * from practica.DetallesPedido_tbl
+
+
+    insert into practica.Productos_tbl
+values( 'Auriculares Gaming Pro','Auriculares con sonido envolvente 7.1', 95.00, 70, 'Audio', GETDATE());
+
+insert into practica.Pedido_tbl
+values(6, GETDATE(), 'Pendiente',0);
+
+insert into practica.DetallesPedido_tbl
+values(8, 8, 1,95.00);
