@@ -280,3 +280,23 @@ select @idLaura = ClienteId
 from practica.Clientes_tbl
 where Nombre = 'Laura' and Apellido = 'Martínez'
     print 'id: ' + cast(@idLaura as nvarchar(5));
+
+
+-- condicion
+if @idLaura is null
+begin
+ print 'Error: No se encontró al cliente Laura Martínez.';
+ -- siempre se debe poner un end al terminar una condicion
+end
+-- y si no
+else
+begin
+insert into practica.Pedido_tbl
+values (@idLaura, GETDATE(), 'Cancelado', 0.00)
+end
+
+-- obtenemos el id del pedido creado
+declare @idABuscar int;
+set @idABuscar = SCOPE_IDENTITY(); -- devuelve el ultimo id
+print 'ID del nuevo pedido para Laura: ' + CAST(@NuevoPedidoID AS NVARCHAR(10));
+
