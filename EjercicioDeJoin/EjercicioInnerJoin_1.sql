@@ -25,3 +25,19 @@ from practica.Clientes_tbl as cli
 inner join practica.Pedido_tbl as pe
 -- comparación entre tablas
 on cli.ClienteId = pe.Cliente_id;
+
+-- Mejora de ejercicio 1
+
+select distinct
+    clienteId as 'id',
+    Nombre as 'nombre',
+    Apellido as 'apellido',
+    -- nombre de la tabla izquierda
+from practica.Cliente_tbl as cli
+    -- nombre de la tabla derecha
+inner join practica.Pedido_Tbl as pedi
+group by
+    cli.clienteId, cli.Nombre, cli.Apellido
+having
+    -- si la cantidad es mayor a 1
+    count(pedi.PedidoId) > 1;
