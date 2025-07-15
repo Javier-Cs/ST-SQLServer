@@ -122,6 +122,8 @@ select * from joins.ordenes
 
 --- uso de joins
 
+--- uso de inner join
+
 select ord.id_orden, ord.fecha_orden, client.nombre, client.apellido
 FROM joins.ordenes as ord
 inner join joins.clientes as client
@@ -129,3 +131,14 @@ on ord.idcliente = client.idcliente
 where ord.fecha_orden > '2023-04-01'
 go
 
+
+-- uso de left join
+select * from joins.clientes
+select * from joins.ordenes
+
+select cli.nombre, cli.apellido, ord.id_orden, ord.fecha_orden
+from joins.clientes as cli
+         left join joins.ordenes as ord
+                   on  cli.idcliente = ord.idcliente
+order by ord.id_orden
+    go
