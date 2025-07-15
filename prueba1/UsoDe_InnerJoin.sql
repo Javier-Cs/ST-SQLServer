@@ -142,3 +142,26 @@ from joins.clientes as cli
                    on  cli.idcliente = ord.idcliente
 order by ord.id_orden
     go
+
+
+-- uso de Right join
+select ord.id_orden ,cli.nombre, cli.apellido
+from joins.clientes as cli
+         right join joins.ordenes as ord
+                    on ord.idcliente = cli.idcliente
+order by ord.id_orden
+    go
+
+select ord.id_orden ,cli.nombre, cli.apellido
+from joins.ordenes as ord
+         right join joins.clientes as cli
+                    on ord.idcliente = cli.idcliente
+order by ord.id_orden
+    go
+
+-- full join
+select ord.id_orden, cli.nombre, cli.apellido,
+       cli.telefono, cli.ciudad, ord.fecha_orden, ord.id_vendedor
+from joins.ordenes as ord
+         full join joins.clientes as cli
+                   on ord.idcliente = cli.idcliente
