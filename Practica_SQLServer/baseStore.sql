@@ -54,3 +54,26 @@ descriBrand nvarchar(max) not null,
 constraint UQ_nameBrand unique(nameBrand),
 constraint PK_Brand_id primary key(idBrand)
 );
+
+
+---|-----------------------------------------------
+create table store.Users(
+idUser int identity(1,1) not null,
+nameUser nvarchar(200) not null,
+emailUser nvarchar(200) not null,
+phoneUser nvarchar(20) not null,
+registreUser datetime default getdate(),
+isActivo bit default(1),
+constraint UQ_email unique(emailUser),
+constraint PK_User_id primary key(idUser)
+);
+
+create table store.Inventory(
+idInventory int identity(1,1) not null,
+id_Producto int unique,
+stockProdu int,
+lastUpdtock datetime default getdate(),
+constraint PK_invetory_id primary key(idInventory),
+constraint FK_product_id foreign key(id_Producto)
+    references store.Products(idProdu)
+);
