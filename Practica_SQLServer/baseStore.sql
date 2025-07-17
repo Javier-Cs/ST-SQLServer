@@ -13,98 +13,97 @@ go
 create schema store
     go
 
-
-create table store.Products(
-idProdu int identity(1,1) not null,
-nameProdu nvarchar(100) not null,
-descriProdu nvarchar(max) not null,
-priceProdu decimal(10, 2) not null,
-dateCreateProdu datetime default getdate(),
-sku nvarchar(100) not null,
-weightProdu decimal(10,2) not null,
-dimencionProdu nvarchar(200) not null,
-isActivo bit default (1),
-stockProdu int,
-id_categoria int not null,
-id_marca int not null,
-constraint PK_ProductoId primary key(idProdu),
-constraint UQ_sku unique(sku),
-constraint Fk_Categoria foreign key(id_categoria)
-    references store.Categories(idCategoria),
-constraint FK_Marca foreign key(id_marca)
-    references store.Brands(idBrand)
-);
+-- Eliminación de tablas en orden inverso de dependencia para evitar errores
+-- (Si se ejecuta el script completo, es útil para recrear la DB)
+drop table if exists store.OrderItems;
+drop table if exists store.Orders;
+drop table if exists store.Inventory;
+drop table if exists store.Users;
+drop table if exists store.Products;
+drop table if exists store.Categories;
+drop table if exists store.Brands;
 
 
 create table store.Categories(
-idCategoria int identity(1,1) not null,
-nameCateg nvarchar(70) not null,
-descriCateg nvarchar(max) not null,
-isActivo bit default (1),
-constraint UQ_namecate unique(nameCateg),
-constraint PK_Categoria_id primary key(idCategoria)
+CategoryId int identity(1,1) not null,
+Name nvarchar(70) not null,
+Description nvarchar(max) not null,
+IsActive bit default (1),
+constraint UQ_CategoryName unique(Name),
+constraint PK_CategoryId primary key(CategoryId)
 );
-
-
 
 create table store.Brands(
-idBrand int identity(1,1) not null,
-nameBrand nvarchar(100) not null,
-descriBrand nvarchar(max) not null,
-constraint UQ_nameBrand unique(nameBrand),
-constraint PK_Brand_id primary key(idBrand)
+BrandId int identity(1,1) not null,
+Name nvarchar(100) not null,
+Description nvarchar(max) not null,
+constraint UQ_BrandName unique(Name),
+constraint PK_BrandId primary key(BrandId)
 );
 
+create table store.Products(
+ProductId int identity(1,1) not null,
+Name nvarchar(100) not null,
+Description nvarchar(max) not null,
+Price decimal(10, 2) not null,
+DateCreated datetime default getdate(),
+SKU nvarchar(100) not null,
+Weight decimal(10,2) not null,
+Dimensions nvarchar(200) not null,
+IsActive bit default (1),
+CategoryId int not null,
+BrandId int not null,
+constraint PK_ProductId primary key(ProductId),
+constraint UQ_SKU unique(SKU),
+constraint FK_Category foreign key(CategoryId)
+    references store.Categories(CategoryId),
+constraint FK_Brand foreign key(BrandId)
+    references store.Brands(BrandId)
+);
 
----|-----------------------------------------------
 create table store.Users(
-idUser int identity(1,1) not null,
-nameUser nvarchar(200) not null,
-emailUser nvarchar(200) not null,
-phoneUser nvarchar(20) not null,
-registreUser datetime default getdate(),
-isActivo bit default(1),
-constraint UQ_email unique(emailUser),
-constraint PK_User_id primary key(idUser)
+UserId int identity(1,1) not null,
+Name nvarchar(200) not null,
+Email nvarchar(200) not null,
+Phone nvarchar(20) not null,
+RegisteredAt datetime default getdate(),
+IsActive bit default(1),
+constraint UQ_Email unique(Email),
+constraint PK_UserId primary key(UserId)
 );
 
 create table store.Inventory(
-idInventory int identity(1,1) not null,
-id_Producto int unique,
-stockProdu int,
-lastUpdtock datetime default getdate(),
-constraint PK_invetory_id primary key(idInventory),
-constraint FK_product_id foreign key(id_Producto)
-    references store.Products(idProdu)
+InventoryId int identity(1,1) not null,
+ProductId int unique, -- Unique para relación 1 a 1 con Product
+Stock int,
+LastUpdated datetime default getdate(),
+constraint PK_InventoryId primary key(InventoryId),
+constraint FK_Product_Inventory foreign key(ProductId)
+    references store.Products(ProductId)
 );
 
-
----|-----------------------------------------------
-
-create table  store.Ordens(
-idOrden int identity(1,1) not null,
-id_User int not null,
-dateOrden datetime default getdate(),
-montoTotalOrden decimal(10,2) not null,
-statusOrder nvarchar(20) default 'enviado',
-payMethodOrden nvarchar(50) not null,
-costShippOrder decimal(10,2) not null,
-constraint PK_order_id primary key(idOrden),
-constraint FK_user_id foreign key(id_User)
-    references store.Users(idUser)
+create table store.Orders(
+OrderId int identity(1,1) not null,
+UserId int not null,
+OrderDate datetime default getdate(),
+TotalAmount decimal(10,2) not null,
+Status nvarchar(20) default 'enviado',
+PaymentMethod nvarchar(50) not null,
+ShippingCost decimal(10,2) not null,
+constraint PK_OrderId primary key(OrderId),
+constraint FK_User_Order foreign key(UserId)
+    references store.Users(UserId)
 );
 
 create table store.OrderItems(
-idOrderItem int identity(1,1) not null,
-id_Order int not null,
-id_Product int not null,
-cantidadProdu decimal(10,2) not null,
-orderSubtTotal decimal(10,2) not null,
-constraint PK_orderItem_id primary key(idOrderItem),
-
-constraint FK_order_id foreign key(id_Order)
-references store.Ordens(idOrden),
-
-constraint FK_product_id foreign key(id_Product)
-references store.Products(idProdu)
+OrderItemId int identity(1,1) not null,
+OrderId int not null,
+ProductId int not null,
+Quantity int not null, -- Cambiado a INT si siempre son cantidades enteras
+Subtotal decimal(10,2) not null,
+constraint PK_OrderItemId primary key(OrderItemId),
+constraint FK_Order_OrderItem foreign key(OrderId)
+     references store.Orders(OrderId),
+constraint FK_Product_OrderItem foreign key(ProductId)
+     references store.Products(ProductId)
 );
