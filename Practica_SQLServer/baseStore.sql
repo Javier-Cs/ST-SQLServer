@@ -77,3 +77,34 @@ constraint PK_invetory_id primary key(idInventory),
 constraint FK_product_id foreign key(id_Producto)
     references store.Products(idProdu)
 );
+
+
+---|-----------------------------------------------
+
+create table  store.Ordens(
+idOrden int identity(1,1) not null,
+id_User int not null,
+dateOrden datetime default getdate(),
+montoTotalOrden decimal(10,2) not null,
+statusOrder nvarchar(20) default 'enviado',
+payMethodOrden nvarchar(50) not null,
+costShippOrder decimal(10,2) not null,
+constraint PK_order_id primary key(idOrden),
+constraint FK_user_id foreign key(id_User)
+    references store.Users(idUser)
+);
+
+create table store.OrderItems(
+idOrderItem int identity(1,1) not null,
+id_Order int not null,
+id_Product int not null,
+cantidadProdu decimal(10,2) not null,
+orderSubtTotal decimal(10,2) not null,
+constraint PK_orderItem_id primary key(idOrderItem),
+
+constraint FK_order_id foreign key(id_Order)
+references store.Ordens(idOrden),
+
+constraint FK_product_id foreign key(id_Product)
+references store.Products(idProdu)
+);
