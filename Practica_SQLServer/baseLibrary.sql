@@ -3,15 +3,25 @@ create database graph_Db;
 use graph_Db;
 create schema library;
 
+select * from library.books_tbl;
+select * from library.authors_tbl;
+
+drop table library.authors_tbl;
+drop table library.books_tbl;
+drop table library.users_tbl;
+drop table library.reserv_tbl;
+drop table library.loans_tbl;
+
+
 -- Tabla para los libros
 create table library.books_tbl(
     id int identity(1,1),
     title nvarchar(60) not null,
-    yearPublic int not null,
+    year_public int not null,
     editorial nvarchar(50) not null,
     code nvarchar(100) not null,
     state bit not null default 1,
-    numePage int not null,
+    nume_page int not null,
     id_autor int not null,
 
     constraint Pk_libroId primary key(id),
@@ -35,9 +45,9 @@ create table library.authors_tbl(
 create table library.users_tbl(
     id int identity(1,1),
     name nvarchar(100) not null,
-    lastName nvarchar(100) not null,
+    last_name nvarchar(100) not null,
     email nvarchar(50) not null,
-    date_Regis date default getDate() not null,
+    date_regis date default getDate() not null,
 
     constraint PK_userId primary key(id)
 );
