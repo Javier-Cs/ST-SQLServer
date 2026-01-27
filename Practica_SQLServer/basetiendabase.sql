@@ -44,3 +44,47 @@ where id_venta = @idventa and
       estado_venta = @estadoventa and
       tipo_venta = @tipoventa
 
+
+--- conulta para obtener los datos de la venta y el cliente
+SELECT
+    v.id_venta,
+    v.nombre_vendedor,
+    v.descripcion_venta,
+    v.tipo_venta,
+    v.estado_venta,
+    v.efectivo_recibido,
+    v.monto_total_Venta,
+    v.monto_vuelto,
+    v.fecha_venta,
+    c.id_cliente,
+    c.nombre AS nombre_cliente,
+    c.telefono,
+    c.email,
+    c.tipo AS tipo_cliente,
+    c.estado AS estado_cliente,
+    c.fecha_creacion
+FROM ventas v
+         INNER JOIN clientes c
+        ON v.id_cliente = c.id_cliente;
+
+
+---- tabla de registro de pago
+create  table(
+        id_pago_deud int identity(1,1) primary key,
+        fecha_pago datetime not null,
+        nombre_cliente_deudor nvarchar(30) not null,
+        nombre_vendedort nvarchar(49) not null,
+        numero_ttal_ventas int not null,
+        efectivo_recibido decimal(10,2) not null,
+        valor_a_pagar decimal(10,2) not null ,
+        vuelto_de_deuda decimal(10,2) not null
+);
+
+
+
+
+
+
+
+
+
