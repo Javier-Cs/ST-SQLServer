@@ -81,6 +81,54 @@ create  table(
 );
 
 
+--- ELIMINAR UN CLIENTE ESPECIFICO
+DELETE FROM clientes
+       WHERE id_cliente = 4;
+
+--- ELIMINAR PRIMERO LA VENTA ANTES DE LÑ USUARIO
+DELETE FROM ventas
+WHERE id_cliente = 4;
+
+DELETE FROM clientes
+WHERE id_cliente = 4;
+
+--- CAMBIAR ESTADO DE DE DEUDA
+UPDATE ventas
+SET estado_venta = 'PAGADO'
+WHERE id_cliente = 4
+  AND estado_venta = 'DEUDA';
+
+
+-- CAMBIERE VENTA ESPECIFICA
+UPDATE ventas
+SET estado_venta = 'PAGADO'
+WHERE id_venta = 10
+  AND estado_venta = 'DEUDA';
+
+
+drop table ventas;
+drop table clientes;
+
+---- delete from clientes where id_cliente = 4
+
+UPDATE ventas
+SET estado_venta = 'PAGADO'
+WHERE id_venta = 7
+  AND id_cliente = 1
+  AND estado_venta = 'DEUDA'
+
+
+    tipo_venta
+
+UPDATE ventas
+SET tipo_venta = 'CREDITO'
+WHERE id_venta = 7
+  AND tipo_venta = 'CONTADO'
+
+
+
+
+
 
 
 
