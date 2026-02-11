@@ -30,9 +30,40 @@ CREATE TABLE ventas (
 
 
 
+---- tabla de registro de pago
+create table registro_pago_Ventas(
+        id_pago int identity(1,1) primary key,
+        fecha_pago datetime not null default DATEADD(HOUR, -5, GETUTCDATE()) ,
+        id_clientef  int not null,
+        ---id_ventaf int not null,
+
+    --- estos datos serian del pago total de las ventas
+        efectivo_recibido_del_pago decimal(10,2) not null,
+        valor_a_pagar decimal(10,2) not null ,
+        vuelto_de_deudas_Totales decimal(10,2) not null,
+    constraint fk_clientes foreign key (id_clientef) references clientes(id_cliente),
+    --constraint fk_ventas foreign key (id_clientef) references ventas(id_venta)
+);
+
+
+CREATE TABLE pago_ventas (
+    id_pagof int not null,
+    id_ventaf int not null,
+
+    constraint pk_pago_ventas primary key (id_pagof, id_ventaf),
+    constraint fk_pagoVenta_pago foreign key (id_pagof) REFERENCES registro_pago_Ventas(id_pago),
+    constraint fk_pagoVenta_venta foreign key (id_ventaf) references ventas(id_venta)
+);
+
+
+
+
+
+
+------------------- CONSULTAS
 select * from ventas
-         where estado_venta = 'deuda' and
-             tipo_venta = 'credito'
+where estado_venta = 'deuda' and
+    tipo_venta = 'credito'
 
 
 select * from ventas
@@ -40,7 +71,7 @@ where estado_venta = @estadoventa and
     tipo_venta = @tipoventa
 
 select  * From ventas where estado_venta = ''
-where id_venta = @idventa and
+    where id_venta = @idventa and
       estado_venta = @estadoventa and
       tipo_venta = @tipoventa
 
@@ -65,20 +96,8 @@ SELECT
     c.fecha_creacion
 FROM ventas v
          INNER JOIN clientes c
-        ON v.id_cliente = c.id_cliente;
+                    ON v.id_cliente = c.id_cliente;
 
-
----- tabla de registro de pago
-create  table(
-        id_pago_deud int identity(1,1) primary key,
-        fecha_pago datetime not null,
-        nombre_cliente_deudor nvarchar(30) not null,
-        nombre_vendedort nvarchar(49) not null,
-        numero_ttal_ventas int not null,
-        efectivo_recibido decimal(10,2) not null,
-        valor_a_pagar decimal(10,2) not null ,
-        vuelto_de_deuda decimal(10,2) not null
-);
 
 
 --- ELIMINAR UN CLIENTE ESPECIFICO
@@ -124,15 +143,3 @@ UPDATE ventas
 SET tipo_venta = 'CREDITO'
 WHERE id_venta = 7
   AND tipo_venta = 'CONTADO'
-
-
-
-
-
-
-
-
-
-
-
-
