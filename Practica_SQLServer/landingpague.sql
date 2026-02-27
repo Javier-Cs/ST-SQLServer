@@ -21,6 +21,7 @@ CREATE TABLE empresas(
 
 CREATE TABLE sucursales (
     id_sucursal INT IDENTITY PRIMARY KEY,
+    id_empresa INT NOT NULL,
     nombre VARCHAR(100) NOT NULL,
     direccion VARCHAR(200),
     estado BIT DEFAULT 1,
@@ -28,10 +29,11 @@ CREATE TABLE sucursales (
 );
 
 CREATE TABLE cajas (
-    id_caja INT IDENTITY PRIMARY KEY,
+    id_caja INT IDENTITY(1,1),
     id_sucursal INT NOT NULL,
     nombre VARCHAR(50) NOT NULL,
     estado BIT DEFAULT 1,
+    CONSTRAINT PRIMARY KEY (id_sucursal, id_caja),
     FOREIGN KEY (id_sucursal) REFERENCES sucursales(id_sucursal)
 );
 
@@ -51,16 +53,17 @@ CREATE TABLE usuarios(
     aux1 VARCHAR(100),
     aux2 VARCHAR(100),
     aux3 VARCHAR(100),
-    CONSTRAINT fk_empresa
+    CONSTRAINT PRIMARY KEY (id_user, id_sucursal),
+    CONSTRAINT fk_sucursal
         FOREIGN KEY(id_sucursal)
-        REFERENCES empresas(id_sucursal)
+        REFERENCES sucursales(id_sucursal)
 );
 
 
 
 CREATE TABLE clientes (
     id_cliente     INT IDENTITY(1,1) PRIMARY KEY,
-    id_empresa     INT NOT NULL,
+    id_empresa    INT NOT NULL,
     nombre         VARCHAR(100) NOT NULL,
     telefono       VARCHAR(20),
     cedula_ruc          CHAR(13),
@@ -69,6 +72,9 @@ CREATE TABLE clientes (
     estado         BIT DEFAULT 1,
     is_deleted     BIT NOT NULL DEFAULT 0,
     fecha_creacion  DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
+    limite_credito DECIMAL(18,2) NOT NULL DEFAULT 0,
+    saldo_credito_actual DECIMAL(18,2) NOT NULL DEFAULT 0,
+    dias_credito INT NOT NULL DEFAULT 0,
     aux1 VARCHAR(100),
     aux2 VARCHAR(100),
     aux3 VARCHAR(100),
@@ -84,7 +90,7 @@ CREATE TABLE ventas (
     id_sucursal        INT NOT NULL,
     id_caja            INT NOT NULL,
     id_usuario         INT NOT NULL,
-    tipo_venta         VARCHAR(20),
+    tipo_venta         VARCHAR(20) NOT NULL CHECK (tipo_venta IN ('CONTADO','CREDITO')),
     estado_venta       VARCHAR(20) DEFAULT 'COMPLETADA',
     efectivo_recibido  DECIMAL(18,2) NOT NULL,
     monto_total_Venta  DECIMAL(18,2) NOT NULL,
@@ -103,9 +109,13 @@ CREATE TABLE ventas (
         FOREIGN KEY (id_sucursal)
             REFERENCES sucursales(id_sucursal),
 
-    CONSTRAINT fk_ventas_usuario
-        FOREIGN KEY (id_usuario)
-            REFERENCES usuarios(id_user),
+    CONSTRAINT fk_ventas_usuario_sucursal
+        FOREIGN KEY (id_usuario, id_sucursal)
+            REFERENCES usuarios(id_user, id_sucursal),
+
+    CONSTRAINT fk_caja_sucursal
+        FOREIGN KEY (id_caja, id_sucursal)
+            REFERENCES cajas(id_caja, id_sucursal),
 
     CONSTRAINT CK_ventas_montos_validos
         CHECK (monto_total_Venta >= 0 AND efectivo_recibido >= 0 AND monto_vuelto >= 0)
@@ -122,10 +132,7 @@ CREATE TABLE productos(
     precio_unitario DECIMAL(18,2) NOT NULL,
     precio_mayor DECIMAL(18,2) NOT NULL,
     tiene_iva BIT DEFAULT 1,
-    iva DECIMAL(5,2) NOT NULL,
-    CONSTRAINT fk_productos_empresa
-        FOREIGN KEY (id_empresa)
-            REFERENCES empresas(id_empresa)
+    iva DECIMAL(5,2) NOT NULL
 );
 
 
@@ -161,7 +168,7 @@ CREATE TABLE inventario (
 
     PRIMARY KEY (id_sucursal, id_producto),
     CONSTRAINT fk_inventario_sucursal
-        FOREIGN KEY (id_sucursal) REFERENCES inventario(id_sucursal ),
+        FOREIGN KEY (id_sucursal) REFERENCES sucursales(id_sucursal ),
 
     CONSTRAINT fk_inventario_producto
         FOREIGN KEY (id_producto) REFERENCES productos(id_producto),
@@ -198,61 +205,42 @@ CREATE TABLE movimientos_inventario (
 
 
 
+CREATE TABLE cuentas_por_cobrar (
+    id_cuenta INT IDENTITY PRIMARY KEY,
+    id_venta INT NOT NULL,
+    id_cliente INT NOT NULL,
+    saldo_inicial DECIMAL(18,2) NOT NULL,
+    saldo_actual DECIMAL(18,2) NOT NULL,
+    estado VARCHAR(20) NOT NULL CHECK (estado IN ('PENDIENTE','PAGADA','VENCIDA')),
+    fecha_creacion DATETIME2 DEFAULT GETUTCDATE(),
+    fecha_vencimiento DATETIME2 NULL,
+    FOREIGN KEY (id_venta) REFERENCES ventas(id_venta),
+    FOREIGN KEY (id_cliente) REFERENCES clientes(id_cliente),
+    CHECK (saldo_actual >= 0)
+);
 
 
+CREATE TABLE pagos_credito (
+    id_pago INT IDENTITY PRIMARY KEY,
+    id_cuenta INT NOT NULL,
+    monto DECIMAL(18,2) NOT NULL,
+    fecha_pago DATETIME2 DEFAULT GETUTCDATE(),
+    id_usuario INT NOT NULL,
+    FOREIGN KEY (id_cuenta) REFERENCES cuentas_por_cobrar(id_cuenta),
+    FOREIGN KEY (id_usuario) REFERENCES usuarios(id_user),
+    CHECK (monto > 0)
+);
 
+CREATE INDEX IX_cuentas_venta
+    ON cuentas_por_cobrar(id_venta);
 
---- implementacion de indice para busqueda de empresas
-CREATE INDEX IX_empresas_nombre
-ON empresas(nombre_empresa);
+CREATE UNIQUE INDEX UX_cuentas_por_venta
+    ON cuentas_por_cobrar(id_venta);
 
+CREATE INDEX IX_cuentas_cliente_saldo
+    ON cuentas_por_cobrar(id_cliente, saldo_actual);
 
-
-CREATE INDEX IX_clientes_empresa_nombre
-ON clientes(id_empresa, nombre);
-
---- index para productos
-CREATE INDEX IX_productos_empresa
-ON productos(id_empresa);
-
-CREATE INDEX IX_productos_empresa_categoria
-ON productos(id_empresa, categoria);
-
-
---- index para ventas
-CREATE INDEX IX_venta_empresa_usuario
-ON ventas(id_empresa, id_usuario);
-
-CREATE INDEX IX_ventas_empresa_cliente
-ON ventas(id_empresa, id_cliente);
-
-
---- index para detalle venta
-CREATE INDEX IX_detalle_producto_venta
-    ON detalle_venta(id_producto, id_venta);
-
-
-----
-CREATE INDEX IX_ventas_dashboard
-    ON ventas(id_empresa, fecha_venta)
-    INCLUDE (monto_total_Venta, id_usuario);
-
----
-CREATE UNIQUE INDEX IX_productos_empresa_codigo
-ON productos(id_empresa, bodigo_barras);
-
----
-
-
-
-
-ALTER TABLE detalle_venta
-ALTER COLUMN precio_unitario DECIMAL(18,2) NOT NULL;
-
-
-
-ALTER TABLE clientes ADD is_deleted BIT NOT NULL DEFAULT 0;
-ALTER TABLE productos ADD is_deleted BIT NOT NULL DEFAULT 0;
-ALTER TABLE ventas ADD is_deleted BIT NOT NULL DEFAULT 0;
+CREATE INDEX IX_cuentas_estado
+    ON cuentas_por_cobrar(estado);
 
 
