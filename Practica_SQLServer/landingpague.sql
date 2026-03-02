@@ -59,6 +59,42 @@ CREATE TABLE usuarios(
 );
 
 
+CREATE TABLE aperturas_caja (
+    id_apertura INT IDENTITY PRIMARY KEY,
+    id_sucursal INT NOT NULL,
+    id_caja INT NOT NULL,
+    id_usuario INT NOT NULL,
+
+    fecha_apertura DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
+    monto_inicial DECIMAL(18,2) NOT NULL,
+
+    fecha_cierre DATETIME2 NULL,
+    total_ventas DECIMAL(18,2) NULL,
+    total_credito DECIMAL(18,2) NULL,
+    total_efectivo_sistema DECIMAL(18,2) NULL,
+    monto_fisico DECIMAL(18,2) NULL,
+    diferencia DECIMAL(18,2) NULL,
+
+    estado VARCHAR(20) NOT NULL DEFAULT 'ABIERTA'
+        CHECK (estado IN ('ABIERTA','CERRADA')),
+
+    FOREIGN KEY (id_caja, id_sucursal)
+        REFERENCES cajas(id_caja, id_sucursal),
+
+    FOREIGN KEY (id_usuario)
+        REFERENCES usuarios(id_user),
+
+    CONSTRAINT UQ_apertura_caja
+        UNIQUE (id_apertura, id_caja, id_sucursal),
+
+    CHECK (monto_inicial >= 0),
+
+    CHECK (
+        (estado = 'ABIERTA' AND fecha_cierre IS NULL)
+            OR
+        (estado = 'CERRADA' AND fecha_cierre IS NOT NULL)
+        )
+);
 
 CREATE TABLE clientes (
     id_cliente     INT IDENTITY(1,1) PRIMARY KEY,
@@ -94,10 +130,12 @@ CREATE TABLE ventas (
     monto_total_Venta  DECIMAL(18,2) NOT NULL,
     monto_vuelto       DECIMAL(18,2) NOT NULL,
     fecha_venta        DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
+    id_apertura INT NOT NULL,
     row_version ROWVERSION,
     aux1 VARCHAR(100),
     aux2 VARCHAR(100),
     aux3 VARCHAR(100),
+    UNIQUE (id_venta, tipo_venta),
 
     CONSTRAINT fk_ventas_clientes
         FOREIGN KEY (id_cliente)
@@ -115,12 +153,14 @@ CREATE TABLE ventas (
         FOREIGN KEY (id_caja, id_sucursal)
             REFERENCES cajas(id_caja, id_sucursal),
 
-    CONSTRAINT CK_ventas_montos_validos
-        CHECK (monto_total_Venta >= 0 AND efectivo_recibido >= 0 AND monto_vuelto >= 0),
+    CONSTRAINT FK_ventas_apertura
+        FOREIGN KEY (id_apertura, id_caja, id_sucursal)
+            REFERENCES aperturas_caja(id_apertura, id_caja, id_sucursal),
 
-    CONSTRAINT UQ_ventas_id_tipo
-        UNIQUE (id_venta, tipo_venta);
+    CONSTRAINT CK_ventas_montos_validos
+        CHECK (monto_total_Venta >= 0 AND efectivo_recibido >= 0 AND monto_vuelto >= 0)
 );
+
 
 CREATE TABLE productos(
     id_producto INT IDENTITY(1,1) PRIMARY KEY,
@@ -203,6 +243,7 @@ CREATE TABLE movimientos_inventario (
 
 
 
+
 CREATE TABLE cuentas_por_cobrar (
     id_cuenta INT IDENTITY PRIMARY KEY,
     id_venta INT NOT NULL,
@@ -224,7 +265,7 @@ CREATE TABLE cuentas_por_cobrar (
 
     CONSTRAINT FK_cuenta_venta_credito
         FOREIGN KEY (id_venta, tipo_venta)
-            REFERENCES ventas(id_venta, tipo_venta))
+            REFERENCES ventas(id_venta, tipo_venta)
 
 );
 
@@ -240,8 +281,6 @@ CREATE TABLE pagos_credito (
     CHECK (monto > 0)
 );
 
-CREATE UNIQUE INDEX UX_cuenta_por_venta
-    ON cuentas_por_cobrar(id_venta);
 
 CREATE INDEX IX_cuentas_cliente_saldo
     ON cuentas_por_cobrar(id_cliente, saldo_actual);
@@ -257,5 +296,27 @@ CREATE INDEX IX_cuentas_cliente_estado
 
 CREATE INDEX IX_ventas_sucursal_fecha
     ON ventas(id_sucursal, fecha_venta);
+
+CREATE INDEX IX_ventas_apertura
+    ON ventas(id_apertura);
+
+CREATE INDEX IX_ventas_caja_fecha
+    ON ventas(id_caja, id_sucursal, fecha_venta);
+
+CREATE INDEX IX_clientes_cedula
+    ON clientes(cedula_ruc);
+
+CREATE INDEX IX_productos_nombre
+    ON productos(nombre);
+
+CREATE INDEX IX_ventas_cliente_fecha
+    ON ventas(id_cliente, fecha_venta);
+
+CREATE UNIQUE INDEX UX_caja_apertura_abierta
+    ON aperturas_caja(id_caja, id_sucursal)
+    WHERE estado = 'ABIERTA';
+
+CREATE UNIQUE INDEX UX_cuenta_por_venta
+    ON cuentas_por_cobrar(id_venta);
 
 
