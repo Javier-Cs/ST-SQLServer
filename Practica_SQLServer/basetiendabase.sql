@@ -55,6 +55,65 @@ CREATE TABLE pago_ventas (
     constraint fk_pagoVenta_venta foreign key (id_ventaf) references ventas(id_venta)
 );
 
+create table Productos(
+    ProductId int identity(1,1) not null,
+    Code_barras NVARCHAR(50) not null,
+    Nombre nvarchar(100) not null,
+    Description nvarchar(max) not null,
+    Precio decimal(10, 2) not null,
+    PrecioVariable BIT DEFAULT 0,
+    Fecha_creacion datetime default getdate(),
+    IsActive bit default (1),
+    constraint PK_ProductId primary key(ProductId)
+);
+
+CREATE TABLE detalle_venta(
+    id_detalleVenta INT IDENTITY(1,1) PRIMARY KEY,
+    id_venta INT NOT NULL,
+    id_producto INT NOT NULL,
+    cantidad DECIMAL(10,3) NOT NULL,
+    precio_unitario DECIMAL(18,2) NOT NULL,
+    subtotal DECIMAL(18,2) NOT NULL,
+    descuento DECIMAL(18,2) NOT NULL,
+    valor_total DECIMAL(18,2) NOT NULL,
+    CONSTRAINT fk_detalle_venta_venta
+        FOREIGN KEY (id_venta) REFERENCES ventas(id_venta),
+    CONSTRAINT fk_detalle_venta_producto
+        FOREIGN KEY (id_producto) REFERENCES productos(id_producto),
+    CHECK (subtotal = cantidad * precio_unitario),
+    CHECK (valor_total = subtotal - descuento)
+);
+
+
+CREATE TABLE ventas (
+    id_venta           INT IDENTITY(1,1) PRIMARY KEY,
+    id_cliente         INT NOT NULL,
+    tipo_venta         VARCHAR(20) NOT NULL CHECK (tipo_venta IN ('CONTADO','CREDITO')),
+    tipo_documento VARCHAR(20) NOT NULL DEFAULT 'VENTA'
+        CHECK (tipo_documento IN ('VENTA','DEVOLUCION')),
+    fecha_venta        DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
+    subtotal DECIMAL(18,2),
+    descuento_total DECIMAL(18,2),
+    total DECIMAL(18,2),
+    estado VARCHAR(20) DEFAULT 'ABIERTA',
+    row_version ROWVERSION,
+    CHECK (tipo_documento IN ('VENTA','DEVOLUCION')),
+    CONSTRAINT fk_ventas_clientes
+        FOREIGN KEY (id_cliente)
+            REFERENCES clientes(id_cliente)
+);
+
+
+CREATE UNIQUE INDEX IX_Productos_CodigoBarras
+    ON Productos(Code_barras)
+    WHERE Code_barras NULL;
+
+CREATE INDEX IX_detalleVenta_venta
+    ON detalle_venta(id_venta);
+
+CREATE INDEX IX_detalleVenta_producto
+    ON detalle_venta(id_producto);
+
 
 
 
