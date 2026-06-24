@@ -202,3 +202,87 @@ WHERE nombre = 'Cliente Final'
 ---AND estado_venta = 'DEUDA'
 
 
+
+UPDATE clientes
+SET is_deleted = 1
+WHERE id_cliente in (37,38,31,32,33,34,35,31)
+
+
+UPDATE clientes
+SET estado = 0
+WHERE id_cliente in (37,38,31,32,33,34,35,31)
+
+UPDATE clientes
+SET tipo = 'DEUDOR'
+WHERE tipo = 'deudor'
+
+select * FROM clientes;
+
+
+
+UPDATE ventas
+set nombre_vendedor =  'Don Maximo'
+WHERE nombre_vendedor = 'Maximo'
+
+UPDATE clientes
+SET telefono = '0000000000'
+WHERE id_cliente = 15
+
+
+
+
+SELECT
+    v.id_venta,
+    v.id_cliente,
+    v.nombre_vendedor,
+    c.nombre,
+    v.tipo_venta,
+    v.estado_venta,
+    v.monto_total_Venta,
+    v.fecha_venta
+FROM ventas v
+         INNER JOIN clientes c
+                    ON v.id_cliente = c.id_cliente
+WHERE 1=1 AND v.is_deleted = 0 AND v.fecha_venta >= '2026-01-27 01:29:37.780' AND v.fecha_venta < '2026-01-27 23:29:37.780'
+ORDER BY v.fecha_venta DESC;
+
+
+
+select nombre_vendedor from ventas;
+
+use Legumfrutstore;
+select * from usuarios;
+
+
+
+ALTER TABLE usuarios
+    ADD rol_usuario nvarchar(16) null;
+
+ALTER TABLE usuarios
+    ADD id_crede_gmail int null;
+
+ALTER TABLE usuarios
+    ADD email_user nvarchar(70) null;
+
+ALTER TABLE usuarios
+    ADD passHass nvarchar(280) null;
+
+UPDATE usuarios
+set email_user = 'm'
+WHERE id_usuario in (5);
+
+UPDATE usuarios
+set nombre = 'Javier Carchipulla'
+WHERE id_usuario in (1);
+
+
+
+UPDATE usuarios
+set passHass =''
+WHERE id_usuario = 0;
+
+UPDATE usuarios
+set passHass =''
+WHERE id_usuario = 0;
+
+
