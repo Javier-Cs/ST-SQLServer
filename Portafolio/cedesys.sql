@@ -59,35 +59,13 @@ CREATE TABLE cliente_tbl(
     telefono             VARCHAR(20),
     cedula_ruc           CHAR(13),
     email                VARCHAR(100),
-    tipo_cliente         VARCHAR(50),
-    estado               BIT           DEFAULT 1,
-    is_deleted           BIT           NOT NULL DEFAULT 0,
-    fecha_creacion       DATETIME2     NOT NULL DEFAULT GETUTCDATE(),
-    fecha_eliminacion    DATETIME2     NULL,
-    limite_credito         DECIMAL(18,2) NOT NULL DEFAULT 0
-        CHECK (limite_credito >= 0),
-    dias_credito           INT           NOT NULL DEFAULT 0
-        CHECK (dias_credito >= 0),
-
-    CONSTRAINT fk_cliente_empresa
-        FOREIGN KEY (id_empresa) REFERENCES empresa_tbl(id_empresa),
-);
-
-
-CREATE TABLE cliente_empre_tbl(
-    id_cliente_em INT IDENTITY(1,1) PRIMARY KEY,
-    id_empresa INT NOT NULL,
-    nombre VARCHAR(100)  NOT NULL,
+    tipo_cliente         VARCHAR(50) NOT NULL
+        CHECK(tipo_cliente IN ('PERSONA', 'EMPRESA')),
     razon_social VARCHAR(100)  NOT NULL,
     nombre_comercial VARCHAR(100) NOT NULL,
-    telefono             VARCHAR(20),
     direccion             VARCHAR(200),
     ciudad                VARCHAR(30),
     provincia             VARCHAR(30),
-    observaciones       VARCHAR(200),
-    cedula_ruc           CHAR(13),
-    email                VARCHAR(100),
-    tipo                 VARCHAR(50),
     estado               BIT           DEFAULT 1,
     is_deleted           BIT           NOT NULL DEFAULT 0,
     fecha_creacion       DATETIME2     NOT NULL DEFAULT GETUTCDATE(),
@@ -113,7 +91,7 @@ CREATE TABLE producto_tbl(
     precio_venta DECIMAL(18,2) NOT NULL,
     stock_minimo  INT NULL ,
     stock_actual INT NULL,
-    iva  INT NOT NULL,
+    porcentaje_iva  DECIMAL(5,2) NOT NULL,
     estado BIT DEFAULT 1,
     is_deleted BIT DEFAULT 0,
 
@@ -134,41 +112,93 @@ CREATE TABLE categoria_producto_tbl(
     descripcion VARCHAR(100) NOT NULL,
     estado BIT DEFAULT 1,
     is_deleted BIT DEFAULT 0,
+    fecha_venta DATETIME DEFAULT GETDATE(),
+    f_actualiz_venta DATETIME DEFAULT GETDATE(),
 
     CONSTRAINT fk_categoria_empresa
         FOREIGN KEY (id_empresa) REFERENCES empresa_tbl(id_empresa)
 
 );
 
-
-
-CREATE TABLE ventas_empresa_tbl(
+CREATE TABLE ventas_tbl(
     id_venta INT IDENTITY(1,1) PRIMARY KEY,
     id_cliente INT NOT NULL,
-    id_cliente_em INT NULL,
     id_empresa INT NOT NULL,
     id_usuario INT NOT NULL,
 
-    descripcion_venta VARCHAR(300) NULL,
-    tipo_venta VARCHAR(20) NULL,
-    estado_venta VARCHAR(20) NULL,
-    efectivo_recibido DECIMAL(18,2) NOT NULL,
-    monto_total_venta DECIMAL(18,2) NOT NULL,
-    monto_vuelto DECIMAL(18,2) NOT NULL,
+    numero_documento VARCHAR(20) NOT NULL,
+    observacion_venta VARCHAR(300) NULL,
+    tipo_venta VARCHAR(20) NOT NULL
+        CHECK(tipo_venta IN ('CREDITO','CONTADO')),
+    estado_de_venta VARCHAR(20) NOT NULL
+        CHECK(estado_de_venta IN ('PAGADA','ANULADA','PENDIENTE','DEUDA', 'BORRADOR')),
+
     estado BIT DEFAULT 1,
     is_deleted BIT DEFAULT 0,
-    fecha_venta DATETIME DEFAULT GETDATE(),
-    f_actualiz_venta DATETIME DEFAULT GETDATE(),
 
-    CONTRAINT fk_venta_cliente
+    fecha_venta DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
+    fecha_modificacion DATETIME2 DEFAULT GETUTCDATE(),
+
+    sub_total DECIMAL(18,2) NOT NULL DEFAULT 0,
+    descuento DECIMAL(18,2) NOT NULL DEFAULT 0,
+    valor_iva  DECIMAL(18,2) NOT NULL DEFAULT 0,
+    total DECIMAL(18,2) NOT NULL DEFAULT  0,
+
+    /*
+    EL VUELTO Y EFECTIVO RECIBIDO VA EN OTRA TABLA
+    efectivo_recibido DECIMAL(18,2) NOT NULL,
+    monto_vuelto DECIMAL(18,2) NOT NULL,*/
+
+    CONSTRAINT fk_venta_cliente
         FOREIGN KEY (id_cliente) REFERENCES cliente_tbl(id_cliente),
 
-    CONTRAINT fk_venta_cliente_empresa
-        FOREIGN KEY (id_cliente_em) REFERENCES cliente_empre_tbl(id_cliente_em),
-
-    CONTRAINT fk_venta_empresa
+    CONSTRAINT fk_venta_empresa
         FOREIGN KEY (id_empresa) REFERENCES empresa_tbl(id_empresa),
 
-    CONTRAINT fk_venta_usuario
+    CONSTRAINT fk_venta_usuario
         FOREIGN KEY (id_usuario) REFERENCES usuario_tbl(id_usuario)
 );
+
+CREATE TABLE detalle_venta_tbl(
+    id_detalle_venta INT IDENTITY(1,1) PRIMARY KEY,
+    id_empresa INT NOT NULL,
+    id_venta INT NOT NULL,
+    id_producto INT NOT NULL,
+
+    /* VALORES PARA FUTUROS CAMBIOS*/
+    codigo_producto VARCHAR(100) NULL,
+    descripcion_producto VARCHAR(300) NULL,
+    unidad_medida VARCHAR(20),
+    orden_linea INT,
+
+    cantidad DECIMAL(18,2) NOT NULL,
+    precio_unitario DECIMAL(18,2) NOT NULL,
+    porcentaje_descuento DECIMAL(18,2) NOT NULL,
+    valor_descuento DECIMAL(18,2) NOT NULL,
+    porcentaje_iva DECIMAL(5,2) NOT NULL,
+    valor_iva DECIMAL(18,2) NOT NULL,
+    subtotal_linea DECIMAL(18,2) NOT NULL,
+
+    estado BIT DEFAULT 1,
+    is_deleted BIT DEFAULT 0,
+    fecha_detalle_venta DATETIME DEFAULT GETDATE(),
+
+    CONSTRAINT fk_detalle_empresa
+        FOREIGN KEY (id_empresa) REFERENCES empresa_tbl(id_empresa),
+
+    CONSTRAINT fk_detalle_venta
+        FOREIGN KEY (id_venta) REFERENCES ventas_tbl(id_venta),
+
+    CONSTRAINT fk_detalle_producto
+        FOREIGN KEY (id_producto) REFERENCES producto_tbl(id_producto),
+);
+
+CREATE INDEX IX_DetalleVenta
+    ON detalle_venta_tbl(id_venta);
+
+
+CREATE INDEX IX_DetalleProducto
+    ON detalle_venta_tbl(id_producto);
+
+
+
