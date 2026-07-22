@@ -168,8 +168,8 @@ CREATE TABLE detalle_venta_tbl(
     /* VALORES PARA FUTUROS CAMBIOS*/
     codigo_producto VARCHAR(100) NULL,
     descripcion_producto VARCHAR(300) NULL,
-    unidad_medida VARCHAR(20),
-    orden_linea INT,
+    unidad_medida VARCHAR(20) NOT NULL,
+    orden_linea INT NOT NULL ,
 
     cantidad DECIMAL(18,2) NOT NULL,
     precio_unitario DECIMAL(18,2) NOT NULL,
@@ -192,6 +192,73 @@ CREATE TABLE detalle_venta_tbl(
     CONSTRAINT fk_detalle_producto
         FOREIGN KEY (id_producto) REFERENCES producto_tbl(id_producto),
 );
+
+
+
+/*CATALOGO*/
+CREATE TABLE forma_pago_tbl(
+    id_forma_pago INT IDENTITY(1,1) PRIMARY KEY,
+    id_empresa  INT NOT NULL,
+    nombre VARCHAR(30) NOT NULL,
+    codigo_sri VARCHAR(5) NULL,
+    fecha_creacion DATETIME2
+        DEFAULT GETUTCDATE(),
+
+    estado BIT NOT NULL DEFAULT 1,
+    is_deleted BIT NOT NULL DEFAULT 0,
+
+    CONSTRAINT uq_forma_pago_nombre
+        UNIQUE (nombre),
+    CONSTRAINT fk_forma_pago_empresa
+        FOREIGN KEY (id_empresa) REFERENCES empresa_tbl(id_empresa),
+);
+
+
+
+/* TABLA DE PAGOS DE UNA VENTA*/
+CREATE TABLE venta_pago_tbl(
+    id_pago INT IDENTITY(1,1) PRIMARY KEY,
+
+    id_empresa INT NOT NULL,
+    id_venta INT NOT NULL,
+    id_forma_pago INT NOT NULL,
+    id_usuario INT NOT NULL,
+
+    monto DECIMAL(18,2) NOT NULL
+        CHECK (monto > 0),
+
+    referencia_de_pago VARCHAR(150) NULL,
+    observacion VARCHAR(250) NULL,
+
+    fecha_pago DATETIME2 NOT NULL
+        DEFAULT GETUTCDATE(),
+
+    efectivo_recibido DECIMAL(18,2) NULL,
+    monto_vuelto DECIMAL(18,2) NULL,
+
+    estado BIT DEFAULT 1,
+    is_deleted BIT DEFAULT 0,
+
+    CONSTRAINT fk_empresa_tipo_pago
+        FOREIGN KEY (id_empresa) REFERENCES empresa_tbl(id_empresa),
+
+    CONSTRAINT fk_venta_tipo_pago
+        FOREIGN KEY (id_venta) REFERENCES  ventas_tbl(id_venta),
+
+    CONSTRAINT fk_pago_forma
+        FOREIGN KEY(id_forma_pago) REFERENCES forma_pago_tbl(id_forma_pago),
+
+    CONSTRAINT fk_pago_usuario
+        FOREIGN KEY (id_usuario) REFERENCES usuario_tbl(id_usuario)
+);
+
+
+
+
+
+
+
+
 
 CREATE INDEX IX_DetalleVenta
     ON detalle_venta_tbl(id_venta);
@@ -231,3 +298,19 @@ CREATE INDEX IX_ClienteCedula
 
 CREATE INDEX IX_Cliente_id
     ON cliente_tbl(id_cliente);
+
+
+
+/*indices de tipo de pago*/
+CREATE INDEX IX_PagoVenta
+    ON venta_pago_tbl(id_venta);
+
+CREATE INDEX IX_PagoEmpresa
+    ON venta_pago_tbl(id_empresa);
+
+CREATE INDEX IX_PagoFecha
+    ON venta_pago_tbl(fecha_pago);
+
+CREATE INDEX IX_PagoForma
+    ON venta_pago_tbl(id_forma_pago);
+
