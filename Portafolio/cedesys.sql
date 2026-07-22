@@ -200,5 +200,34 @@ CREATE INDEX IX_DetalleVenta
 CREATE INDEX IX_DetalleProducto
     ON detalle_venta_tbl(id_producto);
 
+CREATE INDEX IX_VentaCliente
+    ON ventas_tbl(id_cliente);
+
+CREATE INDEX IX_VentaUsuario
+    ON ventas_tbl(id_usuario);
+
+CREATE INDEX IX_VentaFecha
+    ON ventas_tbl(fecha_venta);
+
+CREATE INDEX IX_VentaEmpresa
+    ON ventas_tbl(id_empresa);
 
 
+/*para la busqueda de codigo de barras */
+CREATE INDEX IX_ProductoCodigo
+    ON producto_tbl(codigo);
+
+CREATE INDEX IX_ProductoEmpresa
+    ON producto_tbl(id_empresa);
+
+
+/*clientes*/
+
+CREATE INDEX IX_ClienteEmpresa
+    ON cliente_tbl(id_empresa);
+
+CREATE INDEX IX_ClienteCedula
+    ON cliente_tbl(cedula_ruc);
+
+CREATE INDEX IX_Cliente_id
+    ON cliente_tbl(id_cliente);
