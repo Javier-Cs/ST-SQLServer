@@ -28,11 +28,15 @@ CREATE TABLE usuario_tbl(
     url_img_user VARCHAR(300) NOT NULL,
     estado_user BIT DEFAULT 1,
     is_deleted BIT DEFAULT 0,
+    ultimo_login DATETIME2 NULL,
     fecha_creacion_empresa DATETIME DEFAULT GETDATE(),
     fecha_modificacion DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
 
     CONSTRAINT fk_usuario_empresa
-        FOREIGN KEY (id_empresa) REFERENCES empresa_tbl(id_empresa)
+        FOREIGN KEY (id_empresa) REFERENCES empresa_tbl(id_empresa),
+
+    CONSTRAINT uq_usuario_email
+        UNIQUE(id_empresa,email)
 );
 
 CREATE TABLE credec_empres_tbl(
@@ -79,7 +83,20 @@ CREATE TABLE cliente_tbl(
         FOREIGN KEY (id_empresa) REFERENCES empresa_tbl(id_empresa),
 );
 
+CREATE TABLE categoria_producto_tbl(
+    id_categoria INT IDENTITY(1,1) PRIMARY KEY,
+    id_empresa INT NOT NULL,
+    nombre VARCHAR(40) NOT NULL,
+    descripcion VARCHAR(100) NOT NULL,
+    estado BIT DEFAULT 1,
+    is_deleted BIT DEFAULT 0,
+    fecha_venta DATETIME DEFAULT GETDATE(),
+    f_actualiz_venta DATETIME DEFAULT GETDATE(),
 
+    CONSTRAINT fk_categoria_empresa
+        FOREIGN KEY (id_empresa) REFERENCES empresa_tbl(id_empresa)
+
+);
 CREATE TABLE producto_tbl(
     id_producto INT IDENTITY(1,1) PRIMARY KEY,
     id_empresa INT NOT NULL,
@@ -103,22 +120,6 @@ CREATE TABLE producto_tbl(
 
 );
 
-
-CREATE TABLE categoria_producto_tbl(
-    id_categoria INT IDENTITY(1,1) PRIMARY KEY,
-    id_empresa INT NOT NULL,
-    id_producto INT NOT NULL,
-    nombre VARCHAR(40) NOT NULL,
-    descripcion VARCHAR(100) NOT NULL,
-    estado BIT DEFAULT 1,
-    is_deleted BIT DEFAULT 0,
-    fecha_venta DATETIME DEFAULT GETDATE(),
-    f_actualiz_venta DATETIME DEFAULT GETDATE(),
-
-    CONSTRAINT fk_categoria_empresa
-        FOREIGN KEY (id_empresa) REFERENCES empresa_tbl(id_empresa)
-
-);
 
 CREATE TABLE ventas_tbl(
     id_venta INT IDENTITY(1,1) PRIMARY KEY,
@@ -208,7 +209,7 @@ CREATE TABLE forma_pago_tbl(
     is_deleted BIT NOT NULL DEFAULT 0,
 
     CONSTRAINT uq_forma_pago_nombre
-        UNIQUE (nombre),
+        UNIQUE (id_empresa, nombre),
     CONSTRAINT fk_forma_pago_empresa
         FOREIGN KEY (id_empresa) REFERENCES empresa_tbl(id_empresa),
 );
@@ -291,7 +292,7 @@ CREATE TABLE credito_tbl(
 );
 
 
-/* ABONO */
+/* ABONO
 CREATE TABLE abono_credito_tbl(
     id_abono INT IDENTITY(1,1) PRIMARY KEY,
     id_empresa INT NOT NULL,
@@ -326,7 +327,7 @@ CREATE TABLE abono_credito_tbl(
     CONSTRAINT fk_abono_credito_cliente
         FOREIGN KEY(id_forma_pago) REFERENCES forma_pago_tbl(id_forma_pago),
 
-);
+);*/
 
 
 /*REPRESENTA EL DINERO RECIBIDO*/
@@ -369,6 +370,10 @@ CREATE TABLE detalle_recibo_cobro_tbl(
     id_credito INT NOT NULL,
 
     monto_aplicado DECIMAL(18,2) NOT NULL,
+    fecha_aplicacion DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
+    estado BIT DEFAULT 1,
+    is_deleted BIT DEFAULT 0,
+    observacion VARCHAR(200) NULL,
 
     FOREIGN KEY(id_recibo)
         REFERENCES recibo_cobro_tbl(id_recibo),
@@ -416,10 +421,6 @@ CREATE INDEX IX_ClienteEmpresa
 
 CREATE INDEX IX_ClienteCedula
     ON cliente_tbl(cedula_ruc);
-
-CREATE INDEX IX_Cliente_id
-    ON cliente_tbl(id_cliente);
-
 
 
 /*indices de tipo de pago*/
