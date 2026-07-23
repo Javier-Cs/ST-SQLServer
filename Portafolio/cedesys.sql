@@ -39,22 +39,79 @@ CREATE TABLE usuario_tbl(
         UNIQUE(id_empresa,email)
 );
 
+
+/*AUTENTICATION*/
+CREATE TABLE auditoria_login_tbl(
+    id_auditoria INT IDENTITY(1,1) PRIMARY KEY,
+    id_usuario INT NULL,
+    id_empresa INT NOT NULL,
+
+    email VARCHAR(100) NOT NULL,
+    fecha DATETIME2 NOT NULL
+        DEFAULT GETUTCDATE(),
+    ip VARCHAR(45) NOT NULL,
+    user_agent VARCHAR(500) NULL,
+    exito BIT NOT NULL,
+    motivo_error VARCHAR(100) NULL,
+
+    CONSTRAINT fk_empresa_audi_login
+        FOREIGN KEY (id_empresa) REFERENCES empresa_tbl(id_empresa),
+
+    CONSTRAINT fk_usuario_audi_login
+        FOREIGN KEY (id_usuario) REFERENCES usuario_tbl(id_usuario)
+);
+
+
+CREATE TABLE sesion_tbl(
+    id_sesion INT IDENTITY(1,1) PRIMARY KEY,
+    id_usuario INT NOT NULL,
+
+    latitud DECIMAL(10,7),
+    longitud DECIMAL(10,7),
+
+    nombre_dispositivo VARCHAR(100),
+    sistema_operativo VARCHAR(50),
+    navegador VARCHAR(100),
+    user_agent VARCHAR(500),
+
+    refresh_token_hash VARCHAR(500) NOT NULL,
+    fecha_inicio DATETIME2 NOT NULL
+        DEFAULT GETUTCDATE(),
+    fecha_expiracion DATETIME2 NOT NULL,
+    fecha_ultimo_acceso DATETIME2 NOT NULL
+        DEFAULT GETUTCDATE(),
+
+    ip VARCHAR(45) NOT NULL,
+    activa BIT DEFAULT 1,
+
+    is_deleted BIT DEFAULT 0,
+
+    CONSTRAINT fk_usuario_sesion
+        FOREIGN KEY (id_usuario) REFERENCES usuario_tbl(id_usuario)
+
+);
+
+
 CREATE TABLE credec_empres_tbl(
     id_cred_use INT IDENTITY(1,1) PRIMARY KEY,
     id_empresa INT NOT NULL,
+
     servidor_smtp VARCHAR(100) NULL,
     puerto_smtp INT NULL,
     correo_empresa VARCHAR(100) NULL,
-    password_hash  VARBINARY(MAX) NOT NULL,
+
+    password_encriptada VARBINARY(MAX) NOT NULL,
     ssl_tls BIT DEFAULT  1,
     estado_cred BIT DEFAULT 1,
     is_deleted BIT DEFAULT 0,
+
     fecha_creacion_cred DATETIME DEFAULT GETDATE(),
     fecha_modificacion DATETIME2 NULL DEFAULT GETUTCDATE(),
 
     CONSTRAINT fk_credenc_empresa
         FOREIGN KEY (id_empresa) REFERENCES empresa_tbl(id_empresa)
 );
+
 
 CREATE TABLE cliente_tbl(
     id_cliente INT IDENTITY(1,1) PRIMARY KEY,
@@ -366,7 +423,7 @@ CREATE TABLE recibo_cobro_tbl(
 /*DETALLE RECIBIDO COBRO*/
 CREATE TABLE detalle_recibo_cobro_tbl(
     id_detalle INT IDENTITY(1,1) PRIMARY KEY,
-    id_recibo INT NOT NULL,
+    id_recibo_cobro INT NOT NULL,
     id_credito INT NOT NULL,
 
     monto_aplicado DECIMAL(18,2) NOT NULL,
@@ -375,8 +432,8 @@ CREATE TABLE detalle_recibo_cobro_tbl(
     is_deleted BIT DEFAULT 0,
     observacion VARCHAR(200) NULL,
 
-    FOREIGN KEY(id_recibo)
-        REFERENCES recibo_cobro_tbl(id_recibo),
+    FOREIGN KEY(id_recibo_cobro)
+        REFERENCES recibo_cobro_tbl(id_recibo_cobro),
 
     FOREIGN KEY(id_credito)
         REFERENCES credito_tbl(id_credito)
