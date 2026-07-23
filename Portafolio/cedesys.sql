@@ -293,6 +293,37 @@ CREATE TABLE credito_tbl(
 
 /* ABONO */
 CREATE TABLE abono_credito_tbl(
+    id_abono INT IDENTITY(1,1) PRIMARY KEY,
+    id_empresa INT NOT NULL,
+    id_usuario INT NOT NULL,
+    id_credito INT NOT NULL,
+    id_forma_pago INT NOT NULL,
+
+    monto_abono DECIMAL(18,2) NOT NULL
+        CHECK(monto_abono > 0),
+
+    referencia_pago VARCHAR(150) NULL,
+
+    observacion VARCHAR(250) NULL,
+
+    fecha_abono DATETIME2 NOT NULL
+        DEFAULT GETUTCDATE(),
+
+    estado BIT DEFAULT 1,
+    is_deleted BIT DEFAULT 0,
+
+
+    CONSTRAINT fk_abono_credito_empresa
+        FOREIGN KEY(id_empresa) REFERENCES empresa_tbl(id_empresa),
+
+    CONSTRAINT fk_abono_creditooo
+        FOREIGN KEY(id_credito) REFERENCES credito_tbl(id_credito),
+
+    CONSTRAINT fk_abono_credito_usuario
+        FOREIGN KEY (id_usuario) REFERENCES usuario_tbl(id_usuario),
+
+    CONSTRAINT fk_abono_credito_cliente
+        FOREIGN KEY(id_forma_pago) REFERENCES forma_pago_tbl(id_forma_pago),
 
 );
 
