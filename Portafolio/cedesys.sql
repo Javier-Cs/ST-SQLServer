@@ -253,7 +253,56 @@ CREATE TABLE venta_pago_tbl(
 );
 
 
+/* TABLA DE CREDITO */
+CREATE TABLE credito_tbl(
+    id_credito IDENTITY(1,1) PRIMARY KEY,
+    id_venta INT NOT NULL,
+    id_cliente INT NOT NULL,
+    id_empresa INT NOT NULL,
 
+
+    monto_credito DECIMAL(18,2) NOT NULL,
+    saldo_pendiente DECIMAL(18,2) NOT NULL,
+
+    fecha_credito DATETIME2 NOT NULL DEFAULT  GETUTDATE(),
+    fecha_vencimiento DATETIME2 NULL,
+
+    estado_credito VARCHAR(20) NOT NULL
+        CHECK (estado_credito IN ('PENDIENTE', 'PARCIAL', 'PAGADO', 'ANULADO')),
+
+    observacion VARCHAR(150),
+    estado BIT DEFAULT 1,
+    is_deleted BIT DEFAULT 0,
+
+    CONSTRAINT fk_credito_empresa
+        FOREIGN KEY(id_empresa)
+            REFERENCES empresa_tbl(id_empresa),
+
+    CONSTRAINT fk_credito_venta
+        FOREIGN KEY(id_venta)
+            REFERENCES ventas_tbl(id_venta),
+
+    CONSTRAINT fk_credito_cliente
+        FOREIGN KEY(id_cliente)
+            REFERENCES cliente_tbl(id_cliente),
+
+    CONSTRAINT uq_credito_venta
+        UNIQUE(id_venta)
+);
+
+
+/* ABONO */
+CREATE TABLE abono_credito_tbl(
+
+);
+
+
+
+/*RECIBO COBRO*/
+
+
+
+/*DETALLE RECIBIDO COBRO*/
 
 
 
