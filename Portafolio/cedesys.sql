@@ -255,7 +255,7 @@ CREATE TABLE venta_pago_tbl(
 
 /* TABLA DE CREDITO */
 CREATE TABLE credito_tbl(
-    id_credito IDENTITY(1,1) PRIMARY KEY,
+    id_credito INT IDENTITY(1,1) PRIMARY KEY,
     id_venta INT NOT NULL,
     id_cliente INT NOT NULL,
     id_empresa INT NOT NULL,
@@ -264,7 +264,7 @@ CREATE TABLE credito_tbl(
     monto_credito DECIMAL(18,2) NOT NULL,
     saldo_pendiente DECIMAL(18,2) NOT NULL,
 
-    fecha_credito DATETIME2 NOT NULL DEFAULT  GETUTDATE(),
+    fecha_credito DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
     fecha_vencimiento DATETIME2 NULL,
 
     estado_credito VARCHAR(20) NOT NULL
@@ -298,6 +298,7 @@ CREATE TABLE abono_credito_tbl(
     id_usuario INT NOT NULL,
     id_credito INT NOT NULL,
     id_forma_pago INT NOT NULL,
+    id_pago_credito INT NULL,
 
     monto_abono DECIMAL(18,2) NOT NULL
         CHECK(monto_abono > 0),
@@ -328,13 +329,53 @@ CREATE TABLE abono_credito_tbl(
 );
 
 
-
+/*REPRESENTA EL DINERO RECIBIDO*/
 /*RECIBO COBRO*/
+CREATE TABLE recibo_cobro_tbl(
+    id_recibo_cobro INT IDENTITY(1,1) PRIMARY KEY,
 
+    id_empresa INT NOT NULL,
+    id_cliente INT NOT NULL,
+    id_usuario INT NOT NULL,
+    id_forma_pago INT NOT NULL,
+
+    monto_recibido DECIMAL(18,2) NOT NULL,
+    referencia_de_pago VARCHAR(200),
+    observacion VARCHAR(200),
+
+    fecha_recibo_cobro DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
+
+    estado BIT DEFAULT 1,
+    is_deleted BIT DEFAULT 0,
+
+    FOREIGN KEY(id_empresa)
+        REFERENCES empresa_tbl(id_empresa),
+
+    FOREIGN KEY(id_cliente)
+        REFERENCES cliente_tbl(id_cliente),
+
+    FOREIGN KEY(id_usuario)
+        REFERENCES usuario_tbl(id_usuario),
+
+    FOREIGN KEY(id_forma_pago)
+        REFERENCES forma_pago_tbl(id_forma_pago)
+);
 
 
 /*DETALLE RECIBIDO COBRO*/
+CREATE TABLE detalle_recibo_cobro_tbl(
+    id_detalle INT IDENTITY(1,1) PRIMARY KEY,
+    id_recibo INT NOT NULL,
+    id_credito INT NOT NULL,
 
+    monto_aplicado DECIMAL(18,2) NOT NULL,
+
+    FOREIGN KEY(id_recibo)
+        REFERENCES recibo_cobro_tbl(id_recibo),
+
+    FOREIGN KEY(id_credito)
+        REFERENCES credito_tbl(id_credito)
+);
 
 
 
