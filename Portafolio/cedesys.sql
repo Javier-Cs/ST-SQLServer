@@ -12,7 +12,7 @@ CREATE TABLE empresa_tbl(
     estado_empresa BIT DEFAULT 1,
     is_deleted BIT DEFAULT 0,
     fecha_creacion_empresa DATETIME2 DEFAULT GETDATE(),
-    fecha_modificacion DATETIME2 NOT NULL DEFAULT GETUTCDATE()
+    fecha_modificacion DATETIME2 DEFAULT GETDATE()
 );
 
 CREATE TABLE usuario_tbl(
@@ -30,10 +30,10 @@ CREATE TABLE usuario_tbl(
     is_deleted BIT DEFAULT 0,
     ultimo_login DATETIME2 NULL,
     fecha_creacion_empresa DATETIME DEFAULT GETDATE(),
-    fecha_modificacion DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
+    fecha_modificacion DATETIME2 DEFAULT GETDATE()
 
     CONSTRAINT fk_usuario_empresa
-        FOREIGN KEY (id_empresa) REFERENCES empresa_tbl(id_empresa),
+    FOREIGN KEY (id_empresa) REFERENCES empresa_tbl(id_empresa),
 
     CONSTRAINT uq_usuario_email
         UNIQUE(id_empresa,email)
@@ -47,8 +47,7 @@ CREATE TABLE auditoria_login_tbl(
     id_empresa INT NOT NULL,
 
     email VARCHAR(100) NOT NULL,
-    fecha DATETIME2 NOT NULL
-        DEFAULT GETUTCDATE(),
+    fecha DATETIME2 NOT NULL DEFAULT GETDATE(),
     ip VARCHAR(45) NOT NULL,
     user_agent VARCHAR(500) NULL,
     exito BIT NOT NULL,
@@ -75,11 +74,11 @@ CREATE TABLE sesion_tbl(
     user_agent VARCHAR(500),
 
     refresh_token_hash VARCHAR(500) NOT NULL,
-    fecha_inicio DATETIME2 NOT NULL
-        DEFAULT GETUTCDATE(),
-    fecha_expiracion DATETIME2 NOT NULL,
-    fecha_ultimo_acceso DATETIME2 NOT NULL
-        DEFAULT GETUTCDATE(),
+    fecha_inicio DATETIME2 NULL
+        DEFAULT GETDATE(),
+    fecha_expiracion DATETIME2 NULL,
+    fecha_ultimo_acceso DATETIME2 NULL
+        DEFAULT GETDATE(),
 
     ip VARCHAR(45) NOT NULL,
     activa BIT DEFAULT 1,
@@ -106,10 +105,10 @@ CREATE TABLE credec_empres_tbl(
     is_deleted BIT DEFAULT 0,
 
     fecha_creacion_cred DATETIME DEFAULT GETDATE(),
-    fecha_modificacion DATETIME2 NULL DEFAULT GETUTCDATE(),
+    fecha_modificacion DATETIME2 DEFAULT GETDATE()
 
     CONSTRAINT fk_credenc_empresa
-        FOREIGN KEY (id_empresa) REFERENCES empresa_tbl(id_empresa)
+    FOREIGN KEY (id_empresa) REFERENCES empresa_tbl(id_empresa)
 );
 
 
@@ -129,7 +128,7 @@ CREATE TABLE cliente_tbl(
     provincia             VARCHAR(30),
     estado               BIT           DEFAULT 1,
     is_deleted           BIT           NOT NULL DEFAULT 0,
-    fecha_creacion       DATETIME2     NOT NULL DEFAULT GETUTCDATE(),
+    fecha_creacion       DATETIME2     NOT NULL DEFAULT GETDATE(),
     fecha_eliminacion    DATETIME2     NULL,
     limite_credito         DECIMAL(18,2) NOT NULL DEFAULT 0
         CHECK (limite_credito >= 0),
@@ -154,6 +153,8 @@ CREATE TABLE categoria_producto_tbl(
         FOREIGN KEY (id_empresa) REFERENCES empresa_tbl(id_empresa)
 
 );
+
+
 CREATE TABLE producto_tbl(
     id_producto INT IDENTITY(1,1) PRIMARY KEY,
     id_empresa INT NOT NULL,
@@ -186,16 +187,18 @@ CREATE TABLE ventas_tbl(
 
     numero_documento VARCHAR(20) NOT NULL,
     observacion_venta VARCHAR(300) NULL,
+
     tipo_venta VARCHAR(20) NOT NULL
         CHECK(tipo_venta IN ('CREDITO','CONTADO')),
+
     estado_de_venta VARCHAR(20) NOT NULL
         CHECK(estado_de_venta IN ('PAGADA','ANULADA','PENDIENTE','DEUDA', 'BORRADOR')),
 
     estado BIT DEFAULT 1,
     is_deleted BIT DEFAULT 0,
 
-    fecha_venta DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
-    fecha_modificacion DATETIME2 DEFAULT GETUTCDATE(),
+    fecha_venta DATETIME2 NOT NULL DEFAULT GETDATE(),
+    fecha_modificacion DATETIME2 DEFAULT GETDATE(),
 
     sub_total DECIMAL(18,2) NOT NULL DEFAULT 0,
     descuento DECIMAL(18,2) NOT NULL DEFAULT 0,
@@ -260,7 +263,7 @@ CREATE TABLE forma_pago_tbl(
     nombre VARCHAR(30) NOT NULL,
     codigo_sri VARCHAR(5) NULL,
     fecha_creacion DATETIME2
-        DEFAULT GETUTCDATE(),
+        DEFAULT GETDATE(),
 
     estado BIT NOT NULL DEFAULT 1,
     is_deleted BIT NOT NULL DEFAULT 0,
@@ -289,7 +292,7 @@ CREATE TABLE venta_pago_tbl(
     observacion VARCHAR(250) NULL,
 
     fecha_pago DATETIME2 NOT NULL
-        DEFAULT GETUTCDATE(),
+                                              DEFAULT GETDATE(),
 
     efectivo_recibido DECIMAL(18,2) NULL,
     monto_vuelto DECIMAL(18,2) NULL,
@@ -322,7 +325,7 @@ CREATE TABLE credito_tbl(
     monto_credito DECIMAL(18,2) NOT NULL,
     saldo_pendiente DECIMAL(18,2) NOT NULL,
 
-    fecha_credito DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
+    fecha_credito DATETIME2 NOT NULL DEFAULT GETDATE(),
     fecha_vencimiento DATETIME2 NULL,
 
     estado_credito VARCHAR(20) NOT NULL
@@ -349,42 +352,7 @@ CREATE TABLE credito_tbl(
 );
 
 
-/* ABONO
-CREATE TABLE abono_credito_tbl(
-    id_abono INT IDENTITY(1,1) PRIMARY KEY,
-    id_empresa INT NOT NULL,
-    id_usuario INT NOT NULL,
-    id_credito INT NOT NULL,
-    id_forma_pago INT NOT NULL,
-    id_pago_credito INT NULL,
 
-    monto_abono DECIMAL(18,2) NOT NULL
-        CHECK(monto_abono > 0),
-
-    referencia_pago VARCHAR(150) NULL,
-
-    observacion VARCHAR(250) NULL,
-
-    fecha_abono DATETIME2 NOT NULL
-        DEFAULT GETUTCDATE(),
-
-    estado BIT DEFAULT 1,
-    is_deleted BIT DEFAULT 0,
-
-
-    CONSTRAINT fk_abono_credito_empresa
-        FOREIGN KEY(id_empresa) REFERENCES empresa_tbl(id_empresa),
-
-    CONSTRAINT fk_abono_creditooo
-        FOREIGN KEY(id_credito) REFERENCES credito_tbl(id_credito),
-
-    CONSTRAINT fk_abono_credito_usuario
-        FOREIGN KEY (id_usuario) REFERENCES usuario_tbl(id_usuario),
-
-    CONSTRAINT fk_abono_credito_cliente
-        FOREIGN KEY(id_forma_pago) REFERENCES forma_pago_tbl(id_forma_pago),
-
-);*/
 
 
 /*REPRESENTA EL DINERO RECIBIDO*/
@@ -401,7 +369,7 @@ CREATE TABLE recibo_cobro_tbl(
     referencia_de_pago VARCHAR(200),
     observacion VARCHAR(200),
 
-    fecha_recibo_cobro DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
+    fecha_recibo_cobro DATETIME2 NOT NULL DEFAULT GETDATE(),
 
     estado BIT DEFAULT 1,
     is_deleted BIT DEFAULT 0,
@@ -427,7 +395,7 @@ CREATE TABLE detalle_recibo_cobro_tbl(
     id_credito INT NOT NULL,
 
     monto_aplicado DECIMAL(18,2) NOT NULL,
-    fecha_aplicacion DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
+    fecha_aplicacion DATETIME2 NOT NULL DEFAULT GETDATE(),
     estado BIT DEFAULT 1,
     is_deleted BIT DEFAULT 0,
     observacion VARCHAR(200) NULL,
@@ -492,4 +460,11 @@ CREATE INDEX IX_PagoFecha
 
 CREATE INDEX IX_PagoForma
     ON venta_pago_tbl(id_forma_pago);
+
+
+
+INSERT INTO empresa_tbl(nombre_empresa, direccion_empresa, ruc_empresa, url_img_empresa)
+VALUES();
+
+SELECT * FROM empresa_tbl;
 
