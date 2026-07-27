@@ -1,0 +1,94 @@
+{
+  "categorias": [
+    {
+      "id_categoria": 1,
+      "nombre_categoria": "Ropa y textiles",
+      "descripcion": "Prendas y textiles almacenados o colgados",
+      "estado": 1,
+      "subcategorias": [
+        {
+          "id_subcategoria": 1,
+          "id_categoria": 1,
+          "nombre_subcategoria": "Camisas",
+          "descripcion": "Camisas de algodón y poliéster",
+          "estado": 1,
+          "productos": [
+            {
+              "id_producto": 1,
+              "id_subcategoria": 1,
+              "nombre_producto": "Camisa manga larga",
+              "talla": "L",
+              "color": "Azul",
+              "peso": "250g",
+              "descripcion": "Camisa de algodón azul manga larga",
+              "precio": 19.99,
+              "stock": 50,
+              "sku": "CAM-L-001",
+              "url_imagen": "https://ejemplo.com/camisa.jpg",
+              "estado": 1
+            },
+            {
+              "id_producto": 2,
+              "id_subcategoria": 1,
+              "nombre_producto": "Camisa polo",
+              "talla": "M",
+              "color": "Blanca",
+              "peso": "220g",
+              "descripcion": "Camisa polo blanca de algodón",
+              "precio": 15.50,
+              "stock": 80,
+              "sku": "CAM-M-002",
+              "url_imagen": "https://ejemplo.com/polo.jpg",
+              "estado": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id_categoria": 2,
+      "nombre_categoria": "Organización y almacenamiento",
+      "descripcion": "Elementos para colgar o guardar objetos",
+      "estado": 1,
+      "subcategorias": [
+        {
+          "id_subcategoria": 2,
+          "id_categoria": 2,
+          "nombre_subcategoria": "Armadores",
+          "descripcion": "Perchas y colgadores para ropa",
+          "estado": 1,
+          "productos": [
+            {
+              "id_producto": 3,
+              "id_subcategoria": 2,
+              "nombre_producto": "Percha plástica antideslizante",
+              "talla": "Única",
+              "color": "Negro",
+              "peso": "100g",
+              "descripcion": "Percha plástica con superficie antideslizante",
+              "precio": 2.50,
+              "stock": 200,
+              "sku": "PER-001",
+              "url_imagen": "https://ejemplo.com/percha.jpg",
+              "estado": 1
+            },
+            {
+              "id_producto": 4,
+              "id_subcategoria": 2,
+              "nombre_producto": "Armador metálico reforzado",
+              "talla": "Única",
+              "color": "Plateado",
+              "peso": "150g",
+              "descripcion": "Armador metálico para ropa pesada",
+              "precio": 3.75,
+              "stock": 150,
+              "sku": "ARM-002",
+              "url_imagen": "https://ejemplo.com/armador.jpg",
+              "estado": 1
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
