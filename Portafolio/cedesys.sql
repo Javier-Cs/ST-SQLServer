@@ -256,7 +256,7 @@ CREATE TABLE detalle_venta_tbl(
 
 
 
-/*CATALOGO*/
+/**/
 CREATE TABLE forma_pago_tbl(
     id_forma_pago INT IDENTITY(1,1) PRIMARY KEY,
     id_empresa  INT NOT NULL,
@@ -365,6 +365,7 @@ CREATE TABLE recibo_cobro_tbl(
     id_usuario INT NOT NULL,
     id_forma_pago INT NOT NULL,
 
+    numero_documento_cobro INT NOT NULL,
     monto_recibido DECIMAL(18,2) NOT NULL,
     referencia_de_pago VARCHAR(200),
     observacion VARCHAR(200),
@@ -407,9 +408,213 @@ CREATE TABLE detalle_recibo_cobro_tbl(
         REFERENCES credito_tbl(id_credito)
 );
 
+// modulo de compra a proveedor o reabastecimiento de productos
+CREATE  TABLE proveedor_tbl(
+    id_proveedor INT IDENTITY(1,1) PRIMARY KEY,
+    empresa_id INT NOT NULL,
+
+    razon_social VARCHAR(150) NOT NULL,
+    nombre_comercial VARCHAR(150) NOT NULL,
+    identificacion VARCHAR(20) NOT NULL,
+    telefono VARCHAR(30) NOT NULL,
+    email VARCHAR(100) NOT NULL,
+
+    direccion VARCHAR(200) NULL,
+    ciudad VARCHAR(50) NULL,
+    provincia VARCHAR(50) NULL,
+
+    estado BIT NOT NULL DEFAULT 1,
+    is_deleted BIT NOT NULL DEFAULT 0,
+
+    fecha_creacion DATETIME2 NOT NULL DEFAULT GETDATE(),
+    fecha_modificacion DATETIME2 NULL,
+
+    CONSTRAINT fk_proveedor_empresa
+        FOREIGN KEY (empresa_id)
+            REFERENCES empresa_tbl(id_empresa)
+
+);
+
+
+// tabla de compra / adquisiscion de mercaderia
+CREATE TABLE compra_tbl(
+    id_compra INT IDENTITY(1,1) PRIMARY KEY,
+    empresa_id INT NOT NULL,
+    proveedor_id INT NOT NULL,
+    usuario_id INT NOT NULL,
+
+    numero_documento VARCHAR(50) NOT NULL,
+    fecha_compra DATETIME2 NOT NULL DEFAULT GETDATE(),
+
+    subtotal DECIMAL(18,2) NOT NULL DEFAULT 0,
+    descuento DECIMAL(18,2) NOT NULL DEFAULT 0,
+    valor_iva DECIMAL(18,2) NOT NULL DEFAULT 0,
+    total DECIMAL(18,2) NOT NULL DEFAULT 0,
+
+    estado_compra VARCHAR(20) NOT NULL DEFAULT 'REGISTRADA'
+        CHECK (estado_compra IN
+               (
+                'BORRADOR',
+                'REGISTRADA',
+                'ANULADA'
+                   )),
+
+    observacion VARCHAR(300) NULL,
+
+    estado BIT NOT NULL DEFAULT 1,
+    is_deleted BIT NOT NULL DEFAULT 0,
+
+    fecha_creacion DATETIME2 NOT NULL DEFAULT GETDATE(),
+    fecha_modificacion DATETIME2 NULL,
+
+    CONSTRAINT fk_compra_empresa
+        FOREIGN KEY (empresa_id)
+        REFERENCES empresa_tbl(id_empresa),
+
+    CONSTRAINT fk_compra_proveedor
+        FOREIGN KEY (proveedor_id)
+        REFERENCES proveedor_tbl(id_proveedor),
+
+    CONSTRAINT fk_compra_usuario
+        FOREIGN KEY (usuario_id)
+        REFERENCES usuario_tbl(id_usuario)
+
+
+);
+
+
+// detalle de compra
+
+CREATE TABLE detalle_compra_tbl(
+    id_detalle_compra IDENTITY(1,1) PRIMARY KEY,
+    empresa_id INT NOT NULL,
+    compra_id INT NOT NULL,
+    producto_id INT NOT NULL,
+
+    codigo_producto VARCHAR(200) NOT NULL,
+    descripcion_producto VARCHAR(300) NULL,
+
+    cantidad DECIMAL(18,2) NOT NULL,
+    precio_unitario DECIMAL(18,2) NOT NULL,
+
+    porcentaje_descuento DECIMAL(18,2) NOT NULL DEFAULT 0,
+    valor_descuento DECIMAL(18,2) NOT NULL DEFAULT 0,
+
+    porcentaje_iva DECIMAL(5,2) NOT NULL DEFAULT 0,
+    valor_iva DECIMAL(18,2) NOT NULL DEFAULT 0,
+
+    subtotal_linea DECIMAL(18,2) NOT NULL,
+
+    CONSTRAINT fk_destalle_compra_empresa
+        FOREIGN KEY (empresa_id)
+        REFERENCES empresa_tbl(id_empresa),
+
+    CONSTRAINT fk_detallecompra_compra
+        FOREIGN KEY (compra_id)
+        REFERENCES compra_tbl(id_compra),
+
+    CONSTRAINT fk_detalle_compra_producto
+        FOREIGN KEY (producto_id)
+        REFERENCES producto_tbl(id_producto),
+
+    CONSTRAINT ck_detalle_compra_cantidad
+        CHECK (cantidad > 0),
+
+    CONSTRAINT ck_detalle_compra_precio
+        CHECK (precio_unitario >= 0)
+
+);
+
+
+// GESTION DE MOVIMIENTO DE INVENTARIO
+CREATE TABLE movimiento_inventario_tbl (
+    id_movimiento BIGINT IDENTITY(1,1) PRIMARY KEY,
+    empresa_id INT NOT NULL,
+    producto_id INT NOT NULL,
+    usuario_id INT NOT NULL,
+
+    compra_id INT NULL,
+    venta_id INT NULL,
+
+
+    tipo_movimiento VARCHAR(30) NOT NULL
+        CHECK (tipo_movimiento IN
+               (
+                'COMPRA',
+                'VENTA',
+                'AJUSTE_ENTRADA',
+                'AJUSTE_SALIDA',
+                'DEVOLUCION_COMPRA',
+                'DEVOLUCION_VENTA'
+                   )),
+    cantidad DECIMAL(18,2) NOT NULL,
+
+    stock_anterior DECIMAL(18,2) NOT NULL,
+    stock_posterior DECIMAL(18,2) NOT NULL,
+
+    fecha_movimiento DATETIME2 NOT NULL DEFAULT GETDATE(),
+    observacion VARCHAR(300) NULL,
+
+    CONSTRAINT fk_movimiento_empresa
+        FOREIGN KEY (empresa_id)
+            REFERENCES empresa_tbl(id_empresa),
+
+    CONSTRAINT fk_movimiento_producto
+        FOREIGN KEY (producto_id)
+            REFERENCES producto_tbl(id_producto),
+
+    CONSTRAINT fk_movimiento_usuario
+        FOREIGN KEY (usuario_id)
+            REFERENCES usuario_tbl(id_usuario),
+
+    CONSTRAINT fk_movimiento_compra
+        FOREIGN KEY (compra_id)
+            REFERENCES compra_tbl(id_compra),
+
+    CONSTRAINT fk_movimiento_venta
+        FOREIGN KEY (venta_id)
+            REFERENCES ventas_tbl(id_venta)
 
 
 
+);
+
+CREATE TABLE pago_compra_tbl
+(
+    id_pago_compra INT IDENTITY(1,1) PRIMARY KEY,
+
+    empresa_id INT NOT NULL,
+    compra_id INT NOT NULL,
+    forma_pago_id INT NOT NULL,
+    usuario_id INT NOT NULL,
+
+    monto DECIMAL(18,2) NOT NULL
+        CHECK (monto > 0),
+
+    referencia_pago VARCHAR(150) NULL,
+    observacion VARCHAR(250) NULL,
+
+    fecha_pago DATETIME2 NOT NULL DEFAULT GETDATE(),
+
+    estado BIT NOT NULL DEFAULT 1,
+    is_deleted BIT NOT NULL DEFAULT 0,
+
+    CONSTRAINT fk_pago_compra_empresa
+        FOREIGN KEY (empresa_id)
+            REFERENCES empresa_tbl(id_empresa),
+
+    CONSTRAINT fk_pago_compra
+        FOREIGN KEY (compra_id)
+            REFERENCES compra_tbl(id_compra),
+
+    CONSTRAINT fk_pago_compra_forma_pago
+        FOREIGN KEY (forma_pago_id)
+            REFERENCES forma_pago_tbl(id_forma_pago),
+
+    CONSTRAINT fk_pago_compra_usuario
+        FOREIGN KEY (usuario_id)
+            REFERENCES usuario_tbl(id_usuario)
+);
 
 CREATE INDEX IX_DetalleVenta
     ON detalle_venta_tbl(id_venta);
