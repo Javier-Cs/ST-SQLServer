@@ -29,8 +29,8 @@ CREATE TABLE usuario_tbl(
     estado_user BIT DEFAULT 1,
     is_deleted BIT DEFAULT 0,
     ultimo_login DATETIME2 NULL,
-    fecha_creacion_empresa DATETIME DEFAULT GETDATE(),
-    fecha_modificacion DATETIME2 DEFAULT GETDATE()
+    fecha_creacion_usuario DATETIME NOT NULL DEFAULT GETDATE(),
+    fecha_modificacion DATETIME2 DEFAULT GETDATE(),
 
     CONSTRAINT fk_usuario_empresa
     FOREIGN KEY (id_empresa) REFERENCES empresa_tbl(id_empresa),
@@ -105,7 +105,7 @@ CREATE TABLE credec_empres_tbl(
     is_deleted BIT DEFAULT 0,
 
     fecha_creacion_cred DATETIME DEFAULT GETDATE(),
-    fecha_modificacion DATETIME2 DEFAULT GETDATE()
+    fecha_modificacion DATETIME2 DEFAULT GETDATE(),
 
     CONSTRAINT fk_credenc_empresa
     FOREIGN KEY (id_empresa) REFERENCES empresa_tbl(id_empresa)
@@ -136,7 +136,7 @@ CREATE TABLE cliente_tbl(
         CHECK (dias_credito >= 0),
 
     CONSTRAINT fk_cliente_empresa
-        FOREIGN KEY (id_empresa) REFERENCES empresa_tbl(id_empresa),
+        FOREIGN KEY (id_empresa) REFERENCES empresa_tbl(id_empresa)
 );
 
 CREATE TABLE categoria_producto_tbl(
@@ -251,7 +251,7 @@ CREATE TABLE detalle_venta_tbl(
         FOREIGN KEY (id_venta) REFERENCES ventas_tbl(id_venta),
 
     CONSTRAINT fk_detalle_producto
-        FOREIGN KEY (id_producto) REFERENCES producto_tbl(id_producto),
+        FOREIGN KEY (id_producto) REFERENCES producto_tbl(id_producto)
 );
 
 
@@ -271,7 +271,7 @@ CREATE TABLE forma_pago_tbl(
     CONSTRAINT uq_forma_pago_nombre
         UNIQUE (id_empresa, nombre),
     CONSTRAINT fk_forma_pago_empresa
-        FOREIGN KEY (id_empresa) REFERENCES empresa_tbl(id_empresa),
+        FOREIGN KEY (id_empresa) REFERENCES empresa_tbl(id_empresa)
 );
 
 
@@ -292,7 +292,7 @@ CREATE TABLE venta_pago_tbl(
     observacion VARCHAR(250) NULL,
 
     fecha_pago DATETIME2 NOT NULL
-                                              DEFAULT GETDATE(),
+        DEFAULT GETDATE(),
 
     efectivo_recibido DECIMAL(18,2) NULL,
     monto_vuelto DECIMAL(18,2) NULL,
@@ -408,6 +408,7 @@ CREATE TABLE detalle_recibo_cobro_tbl(
         REFERENCES credito_tbl(id_credito)
 );
 
+
 // modulo de compra a proveedor o reabastecimiento de productos
 CREATE  TABLE proveedor_tbl(
     id_proveedor INT IDENTITY(1,1) PRIMARY KEY,
@@ -486,7 +487,7 @@ CREATE TABLE compra_tbl(
 // detalle de compra
 
 CREATE TABLE detalle_compra_tbl(
-    id_detalle_compra IDENTITY(1,1) PRIMARY KEY,
+    id_detalle_compra INT IDENTITY(1,1) PRIMARY KEY,
     empresa_id INT NOT NULL,
     compra_id INT NOT NULL,
     producto_id INT NOT NULL,
@@ -574,9 +575,6 @@ CREATE TABLE movimiento_inventario_tbl (
     CONSTRAINT fk_movimiento_venta
         FOREIGN KEY (venta_id)
             REFERENCES ventas_tbl(id_venta)
-
-
-
 );
 
 CREATE TABLE pago_compra_tbl
@@ -615,6 +613,211 @@ CREATE TABLE pago_compra_tbl
         FOREIGN KEY (usuario_id)
             REFERENCES usuario_tbl(id_usuario)
 );
+
+
+
+// IMPLEMENTACION DE GASTOS
+CREATE TABLE categorias_gastos_tbl(
+    id_categoria_gasto INT IDENTITY(1,1) PRIMARY KEY,
+    empresa_id INT NOT NULL,
+    nombre VARCHAR(70) NOT NULL,
+    descripcion VARCHAR(300) NOT NULL,
+
+    estado BIT NOT NULL DEFAULT 1,
+    is_deleted BIT NOT NULL DEFAULT 0,
+
+    fecha_creacion DATETIME2 NOT NULL DEFAULT GETDATE(),
+    fecha_modificacion DATETIME2 NULL,
+
+    CONSTRAINT fk_categorias_gastos_empresa
+        FOREIGN KEY (empresa_id)
+        REFERENCES empresa_tbl(id_empresa)
+);
+
+
+CREATE TABLE gasto_tbl(
+    id_gasto INT IDENTITY(1,1) PRIMARY KEY,
+
+    empresa_id INT NOT NULL,
+    categoria_gasto_id INT NOT NULL,
+    usuario_id INT NOT NULL,
+    forma_pago_id INT NOT NULL,
+
+    descripcion VARCHAR(300) NOT NULL,
+    monto DECIMAL(18,2) NOT NULL,
+    fecha_gasto DATETIME2 NOT NULL DEFAULT GETDATE(),
+    referencia VARCHAR(200) NOT NULL,
+    observacion VARCHAR(300) NOT NULL,
+
+    estado BIT NOT NULL DEFAULT 1,
+    is_deleted BIT NOT NULL DEFAULT 0,
+
+    fecha_creacion DATETIME2 NOT NULL DEFAULT GETDATE(),
+    fecha_modificacion DATETIME2 NULL,
+
+
+    CONSTRAINT fk_gasto_empresa
+        FOREIGN KEY (empresa_id)
+            REFERENCES empresa_tbl(id_empresa),
+
+    CONSTRAINT fk_gasto_categorias_gastos
+        FOREIGN KEY (categoria_gasto_id)
+            REFERENCES categorias_gastos_tbl(id_categoria_gasto),
+
+    CONSTRAINT fk_gasto_usuario
+        FOREIGN KEY (usuario_id)
+            REFERENCES usuario_tbl(id_usuario),
+
+    CONSTRAINT fk_gasto_forma_pago
+        FOREIGN KEY (forma_pago_id)
+            REFERENCES forma_pago_tbl(id_forma_pago)
+);
+
+
+// HISTORIAL PRECIO
+CREATE TABLE historial_precio_tbl(
+    id_historial_precio INT IDENTITY(1,1) PRIMARY KEY,
+    empresa_id INT NOT NULL,
+    producto_id INT NOT NULL,
+    usuario_id INT NOT NULL,
+
+    precio_compra_anterior DECIMAL(18,2) NOT NULL,
+    precio_compra_nuevo DECIMAL(18,2) NOT NULL,
+
+    precio_venta_anterior DECIMAL(18,2) NOT NULL,
+    precio_venta_nuevo DECIMAL(18,2) NOT NULL,
+
+    fecha_cambio DATETIME2 NULL,
+    motivo VARCHAR(200) NOT NULL,
+
+    CONSTRAINT fk_historial_precio_empresa
+        FOREIGN KEY (empresa_id)
+            REFERENCES empresa_tbl(id_empresa),
+
+    CONSTRAINT fk_historial_precio_producto
+        FOREIGN KEY (producto_id)
+            REFERENCES producto_tbl(id_producto),
+
+    CONSTRAINT fk_historial_precio_usuario
+        FOREIGN KEY (usuario_id)
+            REFERENCES usuario_tbl(id_usuario)
+);
+
+// AUDITORIA DE OPERACION
+CREATE TABLE auditoria_operacion_tbl(
+     id_audoditoria INT IDENTITY(1,1) PRIMARY KEY,
+     empresa_id INT NOT NULL,
+     usuario_id INT NOT NULL,
+
+    modulo VARCHAR(40) NOT NULL,
+    tabla VARCHAR(40) NOT NULL,
+    registro INT NOT NULL,
+    accion VARCHAR(40) NOT NULL,
+
+    datos_anteriores NVARCHAR (MAX) NULL,
+    datos_nuevos NVARCHAR (MAX)  NULL,
+    fecha DATETIME2 NOT NULL DEFAULT GETDATE(),
+    ip VARCHAR(50) NOT NULL,
+    user_agent VARCHAR(50) NOT NULL,
+
+
+     CONSTRAINT fk_auditoria_operacion_empresa
+         FOREIGN KEY (empresa_id)
+             REFERENCES empresa_tbl(id_empresa),
+
+     CONSTRAINT fk_pago_auditoria_operacion_usuario
+         FOREIGN KEY (usuario_id)
+             REFERENCES usuario_tbl(id_usuario)
+
+);
+
+
+CREATE TABLE promocion_tbl(
+    id_promocion INT IDENTITY(1,1) PRIMARY KEY,
+    empresa_id INT NOT NULL,
+
+    nombre VARCHAR(100) NOT NULL,
+    descripcion VARCHAR(200) NOT NULL,
+
+    tipo_promocion VARCHAR(60) NOT NULL,
+    valor DECIMAL(18,2) NOT NULL,
+
+    fecha_inicio DATETIME2 NOT NULL ,
+    fecha_fin DATETIME2 NULL,
+
+    estado BIT NOT NULL DEFAULT 1,
+    is_deleted BIT NOT NULL DEFAULT 0,
+
+    fecha_creacion DATETIME2 NOT NULL DEFAULT GETDATE(),
+    fecha_modificacion DATETIME2 NULL,
+
+    CONSTRAINT fk_promocion_empresa
+        FOREIGN KEY (empresa_id)
+        REFERENCES empresa_tbl(id_empresa)
+);
+
+
+
+CREATE TABLE promocion_producto_tbl
+(
+    id_promocion_producto INT IDENTITY(1,1) PRIMARY KEY,
+    promocion_id          INT NOT NULL,
+    producto_id           INT NOT NULL,
+
+    CONSTRAINT fk_promocionproducto_promocion
+        FOREIGN KEY (promocion_id)
+            REFERENCES promocion_tbl (id_promocion),
+
+    CONSTRAINT fk_promocionproducto_producto
+        FOREIGN KEY (producto_id)
+            REFERENCES producto_tbl (id_producto),
+    UNIQUE (promocion_id, producto_id)
+);
+
+
+CREATE TABLE documento_fiscal_tbl
+(
+    id_documento_fiscal INT IDENTITY(1,1) PRIMARY KEY,
+    empresa_id INT NOT NULL,
+    venta_id INT NOT NULL,
+    tipo_documento VARCHAR(20) NOT NULL,
+
+    -- 1 = pruebas, 0 = producción
+    ambiente BIT NOT NULL,
+
+    -- Puedes usarlo para controlar si está autorizado/anulado/etc.
+    estado_documento VARCHAR(20) NOT NULL,
+    establecimiento VARCHAR(3) NOT NULL,
+    punto_emision VARCHAR(3) NOT NULL,
+    secuencial VARCHAR(9) NOT NULL,
+
+    -- La clave de acceso del SRI es un identificador textual
+    clave_acceso VARCHAR(50) NULL,
+
+    -- El número de autorización también debe manejarse como texto
+    numero_autorizacion VARCHAR(50) NULL,
+    fecha_autorizacion DATETIME2 NULL,
+    fecha_emision DATETIME2 NOT NULL DEFAULT GETDATE(),
+
+    -- XML completo
+    xml_generado NVARCHAR(MAX) NULL,
+    -- XML firmado
+    xml_firmado NVARCHAR(MAX) NULL,
+
+    mensaje_sri VARCHAR(500) NULL,
+
+    fecha_creacion DATETIME2 NOT NULL DEFAULT GETDATE(),
+    fecha_modificacion DATETIME2 NULL,
+
+    CONSTRAINT fk_documento_fiscal_empresa
+        FOREIGN KEY (empresa_id)
+            REFERENCES empresa_tbl(id_empresa),
+
+    CONSTRAINT fk_documento_fiscal_venta
+        FOREIGN KEY (venta_id)
+            REFERENCES ventas_tbl(id_venta)
+);
+
 
 CREATE INDEX IX_DetalleVenta
     ON detalle_venta_tbl(id_venta);
@@ -665,11 +868,4 @@ CREATE INDEX IX_PagoFecha
 
 CREATE INDEX IX_PagoForma
     ON venta_pago_tbl(id_forma_pago);
-
-
-
-INSERT INTO empresa_tbl(nombre_empresa, direccion_empresa, ruc_empresa, url_img_empresa)
-VALUES();
-
-SELECT * FROM empresa_tbl;
 
