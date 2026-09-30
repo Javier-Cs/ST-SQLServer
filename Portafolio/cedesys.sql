@@ -818,6 +818,33 @@ CREATE TABLE documento_fiscal_tbl
             REFERENCES ventas_tbl(id_venta)
 );
 
+-- PERMISSIONS
+CREATE TABLE permissions_tbl (
+    id INT IDENTITY(1,1) PRIMARY KEY,
+    usuario_id INT NOT NULL,
+    empresa_id  INT NOT NULL,
+    can_read BIT NOT NULL DEFAULT 0,
+    can_write BIT NOT NULL DEFAULT 0,
+    can_delete BIT NOT NULL DEFAULT 0,
+    can_manage BIT NOT NULL DEFAULT 0,
+
+    created_at DATETIME2 NOT NULL
+        DEFAULT SYSUTCDATETIME(),
+
+    CONSTRAINT fk_permiss_user
+        FOREIGN KEY (usuario_id)
+            REFERENCES usuario_tbl(id_usuario),
+
+    CONSTRAINT fk_permiss_empresa
+        FOREIGN KEY (empresa_id)
+            REFERENCES empresa_tbl (id_empresa),
+
+    CONSTRAINT uq_permissions_usuario_empresa
+        UNIQUE (usuario_id, empresa_id)
+
+);
+
+
 
 CREATE INDEX IX_DetalleVenta
     ON detalle_venta_tbl(id_venta);
