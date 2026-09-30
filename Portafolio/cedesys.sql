@@ -1,4 +1,4 @@
-CREATE DATABASE CedeSys_db;
+CREATE DATABASE CREAT;
 
 USE CedeSys_db;
 
@@ -895,4 +895,9 @@ CREATE INDEX IX_PagoFecha
 
 CREATE INDEX IX_PagoForma
     ON venta_pago_tbl(id_forma_pago);
+
+
+
+
+
 
