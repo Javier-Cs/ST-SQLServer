@@ -5,6 +5,7 @@ USE CedeSys_db;
 
 CREATE TABLE empresa_tbl(
     id_empresa INT IDENTITY(1,1) PRIMARY KEY,
+    /*code_empresa VARCHAR(50) NOT NULL,*/
     nombre_empresa VARCHAR(70) NOT NULL UNIQUE,
     direccion_empresa VARCHAR(100) NOT NULL,
     ruc_empresa VARCHAR(20) NOT NULL,
@@ -14,6 +15,9 @@ CREATE TABLE empresa_tbl(
     fecha_creacion_empresa DATETIME2 DEFAULT GETDATE(),
     fecha_modificacion DATETIME2 DEFAULT GETDATE()
 );
+
+ALTER TABLE empresa_tbl
+    ADD code_empresa VARCHAR(50) NOT NULL;
 
 CREATE TABLE usuario_tbl(
     id_usuario INT IDENTITY(1,1) PRIMARY KEY,
