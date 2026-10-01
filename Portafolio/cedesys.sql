@@ -43,6 +43,10 @@ CREATE TABLE usuario_tbl(
         UNIQUE(id_empresa,email)
 );
 
+ALTER TABLE usuario_tbl
+    ADD intentos_fallidos INT NOT NULL DEFAULT 0,
+    bloqueado_hasta DATETIME2 NULL;
+
 
 /*AUTENTICATION*/
 CREATE TABLE auditoria_login_tbl(
