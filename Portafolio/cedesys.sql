@@ -30,7 +30,7 @@ CREATE TABLE usuario_tbl(
     direccion_user VARCHAR(100) NOT NULL,
     cedula_user VARCHAR(12) NOT NULL UNIQUE,
     url_img_user VARCHAR(300) NOT NULL,
-    estado_user BIT DEFAULT 1,b
+    estado_user BIT DEFAULT 1,
     is_deleted BIT DEFAULT 0,
     ultimo_login DATETIME2 NULL,
     fecha_creacion_usuario DATETIME NOT NULL DEFAULT GETDATE(),
